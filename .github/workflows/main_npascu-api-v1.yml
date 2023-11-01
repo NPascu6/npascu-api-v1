@@ -26,7 +26,7 @@ jobs:
       - name: App Settings Variable Substitution
         uses: microsoft/variable-substitution@v1
         with:
-          files: '${{env.DOTNET_ROOT}}\npascu-api-v1\appsettings.json'
+          files: '${{env.DOTNET_ROOT}}\npascu-api-v1\npascu-api-v1\appsettings.json'
         env:
            NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
 
