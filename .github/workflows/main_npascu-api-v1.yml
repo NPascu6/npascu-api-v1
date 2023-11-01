@@ -25,7 +25,7 @@ jobs:
       
       - name: Replace Password
         run: |
-          (Get-Content -Path "${{ github.workspace }}/appsettings.json") | ForEach-Object {$_ -replace '{NPASCU_API_PASSWORD}', $env:NPASCU_API_PASSWORD} | Set-Content -Path "${{ github.workspace }}/appsettings.json"
+          (Get-Content -Path "${{ github.workspace }}\appsettings.json") | ForEach-Object {$_ -replace '{NPASCU_API_PASSWORD}', $env:NPASCU_API_PASSWORD} | Set-Content -Path "${{ github.workspace }}\appsettings.json"
         env:
            NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
 
