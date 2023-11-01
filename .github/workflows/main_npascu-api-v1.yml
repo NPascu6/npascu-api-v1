@@ -22,6 +22,12 @@ jobs:
           dotnet-version: '7.x'
           include-prerelease: true
 
+      - name: Replace Password
+        run: |
+          sed -i "s/{NPASCU_API_PASSWORD}/${{ secrets.NPASCU_API_PASSWORD }}/g" path/to/appsettings.json
+        env:
+          NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
+
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
