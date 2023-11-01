@@ -4,6 +4,10 @@ using npascu_api_v1.Services.Interface;
 
 namespace npascu_api_v1.Controllers
 {
+    /// <summary>
+    /// Get's all the items
+    /// </summary>
+    /// <returns>A list of Items</returns>
     [ApiController]
     [Route("[controller]")]
     public class ItemController : ControllerBase

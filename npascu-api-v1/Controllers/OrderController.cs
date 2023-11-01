@@ -4,6 +4,9 @@ using npascu_api_v1.Services.Interface;
 
 namespace npascu_api_v1.Controllers
 {
+    /// <summary>
+    /// Get's all the orders
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class OrderController : ControllerBase
