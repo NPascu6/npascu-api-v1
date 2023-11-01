@@ -12,7 +12,7 @@ using npascu_api_v1.Repository;
 namespace npascu_api_v1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231030214750_Initial")]
+    [Migration("20231101103237_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -112,7 +112,7 @@ namespace npascu_api_v1.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("UserItems");
+                    b.ToTable("OrderItem");
                 });
 
             modelBuilder.Entity("npascu_api_v1.Models.Entities.User", b =>

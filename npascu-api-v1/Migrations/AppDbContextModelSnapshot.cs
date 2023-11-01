@@ -109,7 +109,7 @@ namespace npascu_api_v1.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("UserItems");
+                    b.ToTable("OrderItem");
                 });
 
             modelBuilder.Entity("npascu_api_v1.Models.Entities.User", b =>

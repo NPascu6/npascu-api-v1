@@ -99,7 +99,7 @@ namespace npascu_api_v1.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserItems",
+                name: "OrderItem",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -112,20 +112,30 @@ namespace npascu_api_v1.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserItems", x => x.Id);
+                    table.PrimaryKey("PK_OrderItem", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserItems_Items_ItemId",
+                        name: "FK_OrderItem_Items_ItemId",
                         column: x => x.ItemId,
                         principalTable: "Items",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserItems_Orders_OrderId",
+                        name: "FK_OrderItem_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItem_ItemId",
+                table: "OrderItem",
+                column: "ItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItem_OrderId",
+                table: "OrderItem",
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_UserId",
@@ -141,32 +151,22 @@ namespace npascu_api_v1.Migrations
                 name: "IX_UserItem_UserId",
                 table: "UserItem",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserItems_ItemId",
-                table: "UserItems",
-                column: "ItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserItems_OrderId",
-                table: "UserItems",
-                column: "OrderId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "OrderItem");
+
+            migrationBuilder.DropTable(
                 name: "UserItem");
 
             migrationBuilder.DropTable(
-                name: "UserItems");
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Items");
-
-            migrationBuilder.DropTable(
-                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Users");
