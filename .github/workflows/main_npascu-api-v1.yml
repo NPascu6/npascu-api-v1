@@ -24,7 +24,8 @@ jobs:
 
       - name: Replace Password
         run: |
-          sed -i "s/{NPASCU_API_PASSWORD}/${{ secrets.NPASCU_API_PASSWORD }}/g" $(AppContext.BaseDirectory)/appsettings.json
+          sed -i "s/{NPASCU_API_PASSWORD}/${{ secrets.NPASCU_API_PASSWORD }}/g" "$(AppContext.BaseDirectory)/appsettings.json"
+          
         env:
           NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
 
