@@ -23,11 +23,10 @@ jobs:
           include-prerelease: true
 
       
-      - name: Replace Password
-        run: |
-          # Navigate to the directory containing appsettings.json
-          cd ${GITHUB_WORKSPACE}/npascu-api-v1/npascu-api-v1/appsettings.json
-          (Get-Content -Path "appsettings.json") | ForEach-Object {$_ -replace '{NPASCU_API_PASSWORD}', $env:NPASCU_API_PASSWORD} | Set-Content -Path "appsettings.json"
+      - name: App Settings Variable Substitution
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: '${{env.DOTNET_ROOT}}/npascu-api-v1/appsettings.json'
         env:
            NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
 
