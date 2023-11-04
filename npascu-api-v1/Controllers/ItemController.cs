@@ -41,8 +41,8 @@ namespace npascu_api_v1.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while processing the request.");
-                return StatusCode(500, "Internal Server Error"); // HTTP 500 - Internal Server Error
+                _logger.LogError(ex, "An error occurred while processing the request.", ex.Message);
+                return StatusCode(500, "Internal Server Error" + ex.Message); // HTTP 500 - Internal Server Error
             }
         }
     }

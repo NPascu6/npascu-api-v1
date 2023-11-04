@@ -13,7 +13,16 @@ namespace npascu_api_v1.Repository.Implementation
         }
         public IEnumerable<Item> GetItems()
         {
-           return _context.Items.ToList();
+            try
+            {
+                var items = _context.Items;
+                return items;
+
+            }
+            catch(Exception ex) 
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
