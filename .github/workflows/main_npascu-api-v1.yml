@@ -23,12 +23,9 @@ jobs:
           include-prerelease: true
 
       
-      - name: App Settings Variable Substitution
-        uses: microsoft/variable-substitution@v1
-        with:
-          files: '${{env.DOTNET_ROOT}}\npascu-api-v1\npascu-api-v1\appsettings.json'
-        env:
-           NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
+      - name: Substitute NPASCU_API_PASSWORD in appsettings.json
+        run: jq --arg password "${{ secrets.NPASCU_API_PASSWORD }}" '.Password = $password' '${{env.DOTNET_ROOT}}\npascu-api-v1\npascu-api-v1\appsettings.json' > appsettings.json.tmp && mv appsettings.json.tmp '${{env.DOTNET_ROOT}}\npascu-api-v1\npascu-api-v1\appsettings.json'
+
 
 
       - name: Build with dotnet
