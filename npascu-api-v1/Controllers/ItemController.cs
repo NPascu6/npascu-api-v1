@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using npascu_api_v1.Models.DTOs;
 using npascu_api_v1.Services.Interface;
+using System;
+using System.Collections.Generic;
 
 namespace npascu_api_v1.Controllers
 {
@@ -18,15 +21,29 @@ namespace npascu_api_v1.Controllers
         }
 
         /// <summary>
-        /// Get's all the items
+        /// Get all items
         /// </summary>
         /// <returns>A list of Items</returns>
-        [HttpGet]
-        [Route("GetItems")]
-        public IEnumerable<ItemDto> GetItems()
+        [HttpGet("GetItems")]
+        public ActionResult<IEnumerable<ItemDto>> GetItems()
         {
-            _logger.LogInformation("GetItems called");
-            return _itemService.GetItems();
+            try
+            {
+                _logger.LogInformation("GetItems called");
+                var items = _itemService.GetItems();
+
+                if (items == null || !items.Any())
+                {
+                    return NoContent(); // HTTP 204 - No items found
+                }
+
+                return Ok(items); // HTTP 200 - OK
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while processing the request.");
+                return StatusCode(500, "Internal Server Error"); // HTTP 500 - Internal Server Error
+            }
         }
     }
 }
