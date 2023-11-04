@@ -5,7 +5,19 @@
     <RootNamespace>npascu_api_v1_tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<IsTestProject>true</IsTestProject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+    <PackageReference Include="Moq" Version="4.20.69" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+	<PackageReference Include="coverlet.collector" Version="6.0.0">
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		<PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+	<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\npascu-api-v1\npascu-api-v1.csproj" />
