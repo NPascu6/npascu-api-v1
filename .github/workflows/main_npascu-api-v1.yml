@@ -22,16 +22,13 @@ jobs:
           dotnet-version: '7.x'
           include-prerelease: true
 
-      
-      - name: Set Secret Environment Variable
-        run: echo "NPASCU_API_PASSWORD=${{ secrets.NPASCU_API_PASSWORD }}" >> $GITHUB_ENV
-
-
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        env:
+          NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -60,3 +57,5 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AE53F05C739446E2B3A68E5D388B64A2 }}
           package: .
+        env:
+          NPASCU_API_PASSWORD: ${{ secrets.NPASCU_API_PASSWORD }}
