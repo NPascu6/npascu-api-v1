@@ -1,44 +1,25 @@
-using Microsoft.EntityFrameworkCore;
-using npascu_api_v1.Repository;
-using npascu_api_v1.Repository.Implementation;
-using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.DB;
-using npascu_api_v1.Services.Implementation;
-using npascu_api_v1.Services.Interface;
+using npascu_api_v1.Services.Startup;
+
+IConfiguration configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
 
 var builder = WebApplication.CreateBuilder(args);
+var startup = new Startup(configuration);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    if (builder.Environment.IsDevelopment())
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    }
-    else
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("npascu-api-v1"));
-    }
+startup.AddDbContext(builder);
+startup.AddSwaggerConfig(builder);
+startup.AddAuthenticationConfig(builder);
+startup.AddServices(builder);
 
-});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
 });
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IItemService, ItemService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IItemRepository, ItemRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
-
-builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
@@ -56,6 +37,7 @@ app.UseSwaggerUI(options =>
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
