@@ -1,6 +1,6 @@
 ﻿namespace npascu_api_v1.Models.DTOs.Item
 {
-    public class ItemDto : ModelBaseDto
+    public class ItemDto
     {
         public string? Name { get; set; }
         public string? Description { get; set; }

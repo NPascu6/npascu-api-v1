@@ -9,7 +9,6 @@ namespace npascu_api_v1.Models.DTOs.User
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public ICollection<UserItemDto> OwnedItems { get; set; } = new List<UserItemDto>();
         public ICollection<OrderDto> Orders { get; set; } = new List<OrderDto>();
     }
 }
