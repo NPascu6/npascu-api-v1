@@ -59,6 +59,25 @@ namespace npascu_api_v1.Services.Startup
                 jwtIssuer = section["Issuer"];
                 jwtAudience = section["Audience"];
                 jwtSecret = section["SecretKey"];
+
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,        // YourIssuer
+                        ValidIssuer = jwtIssuer,   // Replace with your issuer
+                        ValidateAudience = true,      // YourAudience
+                        ValidAudience = jwtAudience, // Replace with your audience
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero // You can adjust the clock skew as needed
+                    };
+                });
             }
             else
             {
@@ -66,26 +85,28 @@ namespace npascu_api_v1.Services.Startup
                 jwtIssuer = section["Issuer"];
                 jwtAudience = section["Audience"];
                 jwtSecret = section["SecretKey"];
+
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,        // YourIssuer
+                        ValidIssuer = jwtIssuer,   // Replace with your issuer
+                        ValidateAudience = true,      // YourAudience
+                        ValidAudience = jwtAudience, // Replace with your audience
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero // You can adjust the clock skew as needed
+                    };
+                });
             }
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,        // YourIssuer
-                    ValidIssuer = jwtIssuer,   // Replace with your issuer
-                    ValidateAudience = true,      // YourAudience
-                    ValidAudience = jwtAudience, // Replace with your audience
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero // You can adjust the clock skew as needed
-                };
-            });
+     
         }
 
         public void AddSwaggerConfig(WebApplicationBuilder builder)

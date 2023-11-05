@@ -42,6 +42,18 @@ namespace npascu_api_v1.Controllers
                     jwtIssuer = section["Issuer"];
                     jwtAudience = section["Audience"];
                     jwtSecret = section["SecretKey"];
+
+                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
+                    var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                    var tokenOptions = new JwtSecurityToken(
+                        issuer: jwtIssuer,
+                        audience: jwtAudience,
+                        claims: new List<Claim>(),
+                        expires: DateTime.Now.AddMinutes(5),
+                        signingCredentials: signinCredentials
+                    );
+                    var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+                    return Ok(new { Token = tokenString });
                 }
                 else
                 {
@@ -49,19 +61,21 @@ namespace npascu_api_v1.Controllers
                     jwtIssuer = section["Issuer"];
                     jwtAudience = section["Audience"];
                     jwtSecret = section["SecretKey"];
+
+                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
+                    var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                    var tokenOptions = new JwtSecurityToken(
+                        issuer: jwtIssuer,
+                        audience: jwtAudience,
+                        claims: new List<Claim>(),
+                        expires: DateTime.Now.AddMinutes(5),
+                        signingCredentials: signinCredentials
+                    );
+                    var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+                    return Ok(new { Token = tokenString });
                 }
 
-                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
-                var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-                var tokenOptions = new JwtSecurityToken(
-                    issuer: jwtIssuer,
-                    audience: jwtAudience,
-                    claims: new List<Claim>(),
-                    expires: DateTime.Now.AddMinutes(5),
-                    signingCredentials: signinCredentials
-                );
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-                return Ok(new { Token = tokenString });
+                
             }
             else
             {
