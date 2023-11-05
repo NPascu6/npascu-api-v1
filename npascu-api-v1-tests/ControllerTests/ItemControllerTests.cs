@@ -38,7 +38,7 @@ namespace npascu_api_v1_tests.ControllerTests
         [Test]
         public void GetItems_ReturnsItems()
         {
-            var expectedItems = new List<ItemDto> { new ItemDto { Id = 1, Name = "Item1" } };
+            var expectedItems = new List<ItemDto> { new ItemDto { Name = "Item1" } };
             _itemServiceMock.Setup(service => service.GetItems()).Returns(expectedItems);
 
             var result = _controller.GetItems();
@@ -52,7 +52,7 @@ namespace npascu_api_v1_tests.ControllerTests
         public void CreateItem_ReturnsCreated()
         {
             var newItem = new ItemDto { Name = "NewItem" };
-            var createdItem = new ItemDto { Id = 1, Name = "NewItem" };
+            var createdItem = new ItemDto { Name = "NewItem" };
             _itemServiceMock.Setup(service => service.CreateItem(newItem)).Returns(createdItem);
 
             var result = _controller.CreateItem(newItem);
@@ -66,7 +66,7 @@ namespace npascu_api_v1_tests.ControllerTests
         public void UpdateItem_ReturnsUpdatedItem()
         {
             int itemId = 1;
-            var itemDto = new ItemDto { Id = itemId, Name = "UpdatedItem" };
+            var itemDto = new ItemDto { Name = "UpdatedItem" };
             _itemServiceMock.Setup(service => service.UpdateItem(itemId, itemDto)).Returns(itemDto);
 
             var result = _controller.UpdateItem(itemId, itemDto);
@@ -81,7 +81,7 @@ namespace npascu_api_v1_tests.ControllerTests
         public void UpdateItem_ReturnsNotFound()
         {
             int itemId = 1;
-            var itemDto = new ItemDto { Id = itemId, Name = "UpdatedItem" };
+            var itemDto = new ItemDto { Name = "UpdatedItem" };
             _itemServiceMock.Setup(service => service.UpdateItem(itemId, itemDto)).Returns((ItemDto)null);
 
             var result = _controller.UpdateItem(itemId, itemDto);

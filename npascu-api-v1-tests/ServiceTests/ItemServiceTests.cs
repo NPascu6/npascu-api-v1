@@ -28,7 +28,7 @@ namespace npascu_api_v1_tests.ServiceTests
         {
             // Arrange
             var items = new List<Item> { new Item { Id = 1, Name = "Item1" } };
-            var itemDtos = new List<ItemDto> { new ItemDto { Id = 1, Name = "Item1" } };
+            var itemDtos = new List<ItemDto> { new ItemDto { Name = "Item1" } };
 
             _itemRepositoryMock.Setup(repo => repo.GetItems()).Returns(items);
             _mapperMock.Setup(mapper => mapper.Map<IEnumerable<ItemDto>>(items)).Returns(itemDtos);
@@ -76,7 +76,7 @@ namespace npascu_api_v1_tests.ServiceTests
         {
             // Arrange
             int itemId = 1;
-            var itemDto = new ItemDto { Id = itemId, Name = "UpdatedItem" };
+            var itemDto = new ItemDto { Name = "UpdatedItem" };
             var updatedItem = new Item { Id = itemId, Name = "UpdatedItem" };
 
             _mapperMock.Setup(mapper => mapper.Map<Item>(itemDto)).Returns(updatedItem);
@@ -95,7 +95,7 @@ namespace npascu_api_v1_tests.ServiceTests
         {
             // Arrange
             int itemId = 1;
-            var itemDto = new ItemDto { Id = itemId, Name = "UpdatedItem" };
+            var itemDto = new ItemDto { Name = "UpdatedItem" };
 
             _itemRepositoryMock.Setup(repo => repo.UpdateItem(itemId, It.IsAny<Item>())).Returns((Item)null);
 
