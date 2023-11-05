@@ -1,6 +1,8 @@
-﻿namespace npascu_api_v1.Models.DTOs
+﻿using npascu_api_v1.Models.DTOs.User;
+
+namespace npascu_api_v1.Models.DTOs.Order
 {
-    public class OrderDto: ModelBaseDto
+    public class OrderDto : ModelBaseDto
     {
         public int UserId { get; set; }
         public UserDto? User { get; set; }

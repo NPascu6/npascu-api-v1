@@ -1,6 +1,8 @@
-﻿namespace npascu_api_v1.Models.DTOs
+﻿using npascu_api_v1.Models.DTOs.Item;
+
+namespace npascu_api_v1.Models.DTOs.User
 {
-    public class UserItemDto: ModelBaseDto
+    public class UserItemDto : ModelBaseDto
     {
         public int UserId { get; set; }
         public UserDto? User { get; set; }

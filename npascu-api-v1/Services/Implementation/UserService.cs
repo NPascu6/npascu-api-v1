@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.User;
 using npascu_api_v1.Models.Entities;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Interface;
@@ -29,7 +29,7 @@ namespace npascu_api_v1.Services.Implementation
             }
         }
 
-        public UserDto CreateUser(UserDto userDto)
+        public UserDto CreateUser(CreateUserDto userDto)
         {
             try
             {

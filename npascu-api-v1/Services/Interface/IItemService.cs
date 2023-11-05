@@ -1,4 +1,4 @@
-﻿using npascu_api_v1.Models.DTOs;
+﻿using npascu_api_v1.Models.DTOs.Item;
 
 namespace npascu_api_v1.Services.Interface
 {

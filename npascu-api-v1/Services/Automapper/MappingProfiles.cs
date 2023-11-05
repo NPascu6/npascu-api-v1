@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.Item;
+using npascu_api_v1.Models.DTOs.Order;
+using npascu_api_v1.Models.DTOs.User;
 using npascu_api_v1.Models.Entities;
 
 namespace npascu_api_v1.Services.Automapper
@@ -8,29 +10,16 @@ namespace npascu_api_v1.Services.Automapper
     {
         public MappingProfiles()
         {
-            CreateMap<Item, ItemDto>();
-            CreateMap<ItemDto, Item>();
+            CreateMap<Item, ItemDto>().ReverseMap();
 
+            CreateMap<CreateOrderDto, Order>();
+            CreateMap<Order, OrderDto>().ReverseMap();
+            CreateMap<CreateOrderItemDto, OrderItem>();
+            CreateMap<OrderItem, OrderItemDto>().ReverseMap();
 
-            CreateMap<Order, OrderDto>()
-               .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
-               .ReverseMap();
-
-            CreateMap<OrderItem, OrderItemDto>()
-               .ForMember(dest => dest.Order, opt => opt.MapFrom(src => src.Order))
-               .ForMember(dest => dest.Item, opt => opt.MapFrom(src => src.Item))
-               .ReverseMap();
-
-
-            CreateMap<User, UserDto>()
-              .ForMember(dest => dest.OwnedItems, opt => opt.MapFrom(src => src.OwnedItems))
-              .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders))
-              .ReverseMap();
-
-            CreateMap<User, UserDto>()
-              .ForMember(dest => dest.OwnedItems, opt => opt.MapFrom(src => src.OwnedItems))
-              .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders))
-              .ReverseMap();
+            CreateMap<CreateUserDto, User>();
+            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<UserItem, UserItemDto>().ReverseMap();
         }
     }
 }

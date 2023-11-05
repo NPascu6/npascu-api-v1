@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.Order;
 using npascu_api_v1.Services.Interface;
 
 namespace npascu_api_v1.Controllers
@@ -43,7 +43,7 @@ namespace npascu_api_v1.Controllers
         }
 
         [HttpPost("CreateOrder")]
-        public ActionResult<OrderDto> CreateOrder([FromBody] OrderDto orderDto)
+        public ActionResult<OrderDto> CreateOrder([FromBody] CreateOrderDto orderDto)
         {
             try
             {

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using npascu_api_v1.Repository;
 using npascu_api_v1.Repository.Implementation;
 using npascu_api_v1.Repository.Interface;
+using npascu_api_v1.Services.DB;
 using npascu_api_v1.Services.Implementation;
 using npascu_api_v1.Services.Interface;
 
@@ -41,6 +42,9 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
+// Apply database migrations
+var migrator = new DatabaseMigrator(app.Services);
+migrator.MigrateDatabase();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>

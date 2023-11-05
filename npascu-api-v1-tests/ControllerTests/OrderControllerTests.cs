@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using npascu_api_v1.Controllers;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.Order;
 using npascu_api_v1.Services.Interface;
 using NUnit.Framework;
 
@@ -51,7 +51,7 @@ namespace npascu_api_v1_tests.ControllerTests
         [Test]
         public void CreateOrder_ReturnsCreated()
         {
-            var newOrder = new OrderDto {  };
+            var newOrder = new CreateOrderDto {  };
             var createdOrder = new OrderDto { Id = 1 };
             _orderServiceMock.Setup(service => service.CreateOrder(newOrder)).Returns(createdOrder);
 

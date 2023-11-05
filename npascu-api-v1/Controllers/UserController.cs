@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.User;
 using npascu_api_v1.Services.Interface;
 
 namespace npascu_api_v1.Controllers
@@ -44,14 +44,14 @@ namespace npascu_api_v1.Controllers
         }
 
         [HttpPost("CreateUser")]
-        public ActionResult<UserDto> CreateUser([FromBody] UserDto userDto)
+        public ActionResult<UserDto> CreateUser([FromBody] CreateUserDto userDto)
         {
             try
             {
                 // Perform validation and user creation logic here
                 var createdUser = _userService.CreateUser(userDto);
 
-                return CreatedAtAction("GetUser", new { id = createdUser.Id }, createdUser); // HTTP 201 - Created
+                return Ok(createdUser);
             }
             catch (Exception ex)
             {

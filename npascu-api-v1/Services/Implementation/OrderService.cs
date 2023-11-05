@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.Order;
 using npascu_api_v1.Models.Entities;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Interface;
@@ -30,7 +30,7 @@ namespace npascu_api_v1.Services.Implementation
             }
         }
 
-        public OrderDto CreateOrder(OrderDto orderDto)
+        public OrderDto CreateOrder(CreateOrderDto orderDto)
         {
             try
             {

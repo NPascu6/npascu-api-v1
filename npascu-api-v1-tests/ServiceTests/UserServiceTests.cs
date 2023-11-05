@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Moq;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.User;
 using npascu_api_v1.Models.Entities;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Implementation;
@@ -44,18 +44,19 @@ namespace npascu_api_v1_tests.ServiceTests
         public void CreateUser_ReturnsCreatedUser()
         {
             // Arrange
-            var userDto = new UserDto { FirstName = "NewUser" };
+            var createUserDto = new CreateUserDto { FirstName = "NewUser" };
             var user = new User { Id = 1, FirstName = "NewUser" };
+            var userDto = new UserDto { Id = 1, FirstName = "NewUser" };
 
-            _mapperMock.Setup(mapper => mapper.Map<User>(userDto)).Returns(user);
+            _mapperMock.Setup(mapper => mapper.Map<User>(createUserDto)).Returns(user);
             _userRepositoryMock.Setup(repo => repo.CreateUser(user)).Returns(user);
             _mapperMock.Setup(mapper => mapper.Map<UserDto>(user)).Returns(userDto);
 
             // Act
-            var result = _userService.CreateUser(userDto);
+            var result = _userService.CreateUser(createUserDto);
 
             // Assert
-            Assert.AreEqual(userDto, result);
+            Assert.AreEqual(createUserDto.FirstName, result.FirstName);
         }
 
         [Test]

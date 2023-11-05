@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using npascu_api_v1.Controllers;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.Item;
 using npascu_api_v1.Services.Interface;
 using NUnit.Framework;
 

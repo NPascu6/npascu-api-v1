@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Moq;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.Order;
 using npascu_api_v1.Models.Entities;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Implementation;
@@ -49,18 +49,19 @@ namespace npascu_api_v1_tests.ServiceTests
         public void CreateOrder_ReturnsCreatedOrder()
         {
             // Arrange
-            var orderDto = new OrderDto { };
+            var orderDto = new OrderDto { Id = 1 };
             var order = new Order { Id = 1 };
+            var createOrderDto = new CreateOrderDto {  };
 
-            _mapperMock.Setup(mapper => mapper.Map<Order>(orderDto)).Returns(order);
+            _mapperMock.Setup(mapper => mapper.Map<Order>(createOrderDto)).Returns(order);
             _orderRepositoryMock.Setup(repo => repo.CreateOrder(order)).Returns(order);
             _mapperMock.Setup(mapper => mapper.Map<OrderDto>(order)).Returns(orderDto);
 
             // Act
-            var result = _orderService.CreateOrder(orderDto);
+            var result = _orderService.CreateOrder(createOrderDto);
 
             // Assert
-            Assert.AreEqual(orderDto, result);
+            Assert.AreEqual(orderDto.Id, result.Id);
         }
 
         [Test]

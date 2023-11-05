@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using npascu_api_v1.Controllers;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.User;
 using npascu_api_v1.Services.Interface;
 using NUnit.Framework;
 
@@ -57,16 +57,17 @@ namespace npascu_api_v1_tests.ControllerTests
         [Test]
         public void CreateUser_ReturnsCreated()
         {
-            var newUser = new UserDto { FirstName = "NewUser" };
-            var createdUser = new UserDto { Id = 1, FirstName = "NewUser" };
+            var newUser = new CreateUserDto { FirstName = "NewUser" };
+            var createdUser = new UserDto { FirstName = "NewUser" };
             _userServiceMock.Setup(service => service.CreateUser(newUser)).Returns(createdUser);
 
             var result = _controller.CreateUser(newUser);
 
             Assert.IsNotNull(result.Result);
-            var createdAtActionResult = (CreatedAtActionResult)result.Result;
-            UserDto createUser = (UserDto)createdAtActionResult.Value;
-            Assert.AreEqual(createdUser.Id, createUser.Id);
+            var okResult = (OkObjectResult)result.Result;
+            var user = (UserDto)okResult.Value;
+
+            Assert.AreEqual(createdUser.FirstName, user.FirstName);
         }
 
         [Test]

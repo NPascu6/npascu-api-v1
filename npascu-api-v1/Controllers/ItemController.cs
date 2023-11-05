@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using npascu_api_v1.Models.DTOs;
+using npascu_api_v1.Models.DTOs.Item;
 using npascu_api_v1.Services.Interface;
 using System;
 using System.Collections.Generic;
