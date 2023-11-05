@@ -6,7 +6,6 @@ using npascu_api_v1.Services.Implementation;
 using npascu_api_v1.Services.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -28,6 +27,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
 
 builder.Services.AddAutoMapper(typeof(Program));
 
