@@ -6,11 +6,10 @@ IConfiguration configuration = new ConfigurationBuilder()
     .Build();
 
 var builder = WebApplication.CreateBuilder(args);
-var startup = new Startup(configuration);
+var startup = new Startup();
 
 startup.AddDbContext(builder);
 startup.AddSwaggerConfig(builder);
-startup.AddAuthenticationConfig(builder);
 startup.AddServices(builder);
 
 builder.Services.AddEndpointsApiExplorer();

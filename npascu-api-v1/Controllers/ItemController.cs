@@ -9,7 +9,6 @@ using static System.Net.WebRequestMethods;
 
 namespace npascu_api_v1.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ItemController : ControllerBase
@@ -27,7 +26,6 @@ namespace npascu_api_v1.Controllers
         /// Get all items
         /// </summary>
         /// <returns>A list of Items</returns>
-        [Authorize]
         [HttpGet("GetItems")]
         public ActionResult<IEnumerable<ItemDto>> GetItems()
         {
@@ -50,7 +48,6 @@ namespace npascu_api_v1.Controllers
             }
         }
 
-        [Authorize]
         [HttpPost("CreateItem")]
         public ActionResult<ItemDto> CreateItem([FromBody] ItemDto itemDto)
         {
@@ -68,7 +65,6 @@ namespace npascu_api_v1.Controllers
             }
         }
 
-        [Authorize]
         [HttpPut("UpdateItem/{id}")]
         public ActionResult<ItemDto> UpdateItem(int id, [FromBody] ItemDto itemDto)
         {
@@ -91,7 +87,6 @@ namespace npascu_api_v1.Controllers
             }
         }
 
-        [Authorize]
         [HttpDelete("DeleteItem/{id}")]
         public ActionResult DeleteItem(int id)
         {

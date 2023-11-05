@@ -1,25 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using npascu_api_v1.Repository;
 using npascu_api_v1.Repository.Implementation;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Implementation;
 using npascu_api_v1.Services.Interface;
-using System.Text;
 
 namespace npascu_api_v1.Services.Startup
 {
     public class Startup
     {
-        private readonly IConfiguration _configuration;
-
-        public Startup(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         public void AddDbContext(WebApplicationBuilder builder)
         {
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -44,75 +34,6 @@ namespace npascu_api_v1.Services.Startup
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IItemRepository, ItemRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-        }
-
-        public void AddAuthenticationConfig(WebApplicationBuilder builder)
-        {
-            try
-            {
-                var jwtIssuer = "";
-                var jwtAudience = "";
-                var jwtSecret = "";
-
-                if (builder.Environment.IsDevelopment())
-                {
-                    var section = _configuration.GetSection("JwtSettingsDev");
-                    jwtIssuer = section["Issuer"];
-                    jwtAudience = section["Audience"];
-                    jwtSecret = section["SecretKey"];
-
-                    builder.Services.AddAuthentication(options =>
-                    {
-                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    }).AddJwtBearer(options =>
-                    {
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,        // YourIssuer
-                            ValidIssuer = jwtIssuer,   // Replace with your issuer
-                            ValidateAudience = true,      // YourAudience
-                            ValidAudience = jwtAudience, // Replace with your audience
-                            ValidateIssuerSigningKey = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-                            ValidateLifetime = true,
-                            ClockSkew = TimeSpan.Zero // You can adjust the clock skew as needed
-                        };
-                    });
-                }
-                else
-                {
-                    jwtIssuer = _configuration["JwtSettingsProd:Issuer"];
-                    jwtAudience = _configuration["JwtSettingsProd:Audience"];
-                    jwtSecret = _configuration["JwtSettingsProd:SecretKey"];
-
-                    builder.Services.AddAuthentication(options =>
-                    {
-                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    }).AddJwtBearer(options =>
-                    {
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,        // YourIssuer
-                            ValidIssuer = jwtIssuer,   // Replace with your issuer
-                            ValidateAudience = true,      // YourAudience
-                            ValidAudience = jwtAudience, // Replace with your audience
-                            ValidateIssuerSigningKey = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-                            ValidateLifetime = true,
-                            ClockSkew = TimeSpan.Zero // You can adjust the clock skew as needed
-                        };
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-
-
-
         }
 
         public void AddSwaggerConfig(WebApplicationBuilder builder)
