@@ -82,10 +82,9 @@ namespace npascu_api_v1.Services.Startup
                 }
                 else
                 {
-                    var section = _configuration.GetSection("JwtSettingsProd");
-                    jwtIssuer = section["Issuer"];
-                    jwtAudience = section["Audience"];
-                    jwtSecret = section["SecretKey"];
+                    jwtIssuer = _configuration["JwtSettingsProd:Issuer"];
+                    jwtAudience = _configuration["JwtSettingsProd:Audience"];
+                    jwtSecret = _configuration["JwtSettingsProd:SecretKey"];
 
                     builder.Services.AddAuthentication(options =>
                     {
