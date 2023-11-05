@@ -32,16 +32,14 @@ namespace npascu_api_v1.Controllers
             }
             if (model.UserName == "test" && model.Password == "test")
             {
-                var jwtIssuer = "";
-                var jwtAudience = "";
-                var jwtSecret = "";
+   
 
                 if (_environment.IsDevelopment())
                 {
                     var section = _configuration.GetSection("JwtSettingsDev");
-                    jwtIssuer = section["Issuer"];
-                    jwtAudience = section["Audience"];
-                    jwtSecret = section["SecretKey"];
+                    var jwtIssuer = section["Issuer"];
+                    var jwtAudience = section["Audience"];
+                    var jwtSecret = section["SecretKey"];
 
                     var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
                     var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -58,9 +56,9 @@ namespace npascu_api_v1.Controllers
                 else
                 {
                     var section = _configuration.GetSection("JwtSettingsProd");
-                    jwtIssuer = section["Issuer"];
-                    jwtAudience = section["Audience"];
-                    jwtSecret = section["SecretKey"];
+                    var jwtIssuer = section["Issuer"];
+                    var jwtAudience = section["Audience"];
+                    var jwtSecret = section["SecretKey"];
 
                     var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
                     var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
