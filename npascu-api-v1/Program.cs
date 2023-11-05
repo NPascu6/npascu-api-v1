@@ -6,10 +6,18 @@ using npascu_api_v1.Services.Implementation;
 using npascu_api_v1.Services.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("npascu-api-v1"));
+    }
+
 });
 
 builder.Services.AddControllers().AddJsonOptions(options =>
