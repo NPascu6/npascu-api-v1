@@ -22,7 +22,7 @@ namespace npascu_api_v1.Controllers
             _userService = userService;
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         [HttpGet("GetUsers")]
         public ActionResult<IEnumerable<UserDto>> GetUsers()
         {
@@ -45,7 +45,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpPost("CreateUser")]
         public ActionResult<UserDto> CreateUser([FromBody] CreateUserDto userDto)
         {
@@ -63,7 +63,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpGet("GetUser/{id}")]
         public ActionResult<UserDto> GetUser(int id)
         {
@@ -85,7 +85,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpPut("UpdateUser/{id}")]
         public ActionResult<UserDto> UpdateUser(int id, [FromBody] UserDto userDto)
         {
@@ -108,7 +108,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpDelete("DeleteUser/{id}")]
         public ActionResult DeleteUser(int id)
         {

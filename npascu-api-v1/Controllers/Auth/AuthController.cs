@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using npascu_api_v1.Models.Entities.Auth;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using npascu_api_v1.Services.Interface;
 
 namespace npascu_api_v1.Controllers.Auth
 {
@@ -12,10 +9,12 @@ namespace npascu_api_v1.Controllers.Auth
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration config)
+        public AuthController(IConfiguration config, IAuthService authService)
         {
             _config = config;
+            _authService = authService;
         }
 
         [HttpPost, Route("login")]
@@ -25,36 +24,55 @@ namespace npascu_api_v1.Controllers.Auth
             {
                 return BadRequest("Invalid client request");
             }
-            if (model.UserName == "test" && model.Password == "1234")
+            if (ModelState.IsValid)
             {
-
-                var configSecretKey = _config.GetSection("Authentication").GetSection("Swagger").GetSection("Secret").Value;
-                var configIssuer = _config.GetSection("Authentication").GetSection("Swagger").GetSection("Issuer").Value;
-                var configAudience = _config.GetSection("Authentication").GetSection("Swagger").GetSection("Audience").Value;
-
-                try
+                if(model.UserName == null || model.Password == null)
                 {
-                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configSecretKey));
-                    var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-                    var tokenOptions = new JwtSecurityToken(
-                        issuer: configIssuer,
-                        audience: configAudience,
-                        claims: new List<Claim>(),
-                        expires: DateTime.Now.AddMinutes(5),
-                        signingCredentials: signinCredentials
-                    );
-                    var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-                    return Ok(new { Token = tokenString });
+                    return BadRequest("Invalid client request");
                 }
-                catch (Exception ex)
+
+                var token = _authService.Login(model.UserName, model.Password);
+                if (token == null || token == "")
                 {
-                    Console.WriteLine(ex.Message);
                     return Unauthorized();
+                }
+                else
+                {
+                    return Ok(new { token });
+
                 }
             }
             else
             {
-                return Unauthorized();
+                return BadRequest("Invalid client request");
+            }
+        }
+
+        [HttpPost]
+        [Route("register")]
+        public IActionResult Register(RegisterModel model)
+        {
+            
+            if (ModelState.IsValid)
+            {
+                if (model.UserName == null || model.Password == null || model.Email == null)
+                {
+                    return BadRequest("Invalid client request");
+                }
+
+                var result = _authService.Register(model.UserName, model.Email, model.Password);
+                if (result == null)
+                {
+                    return BadRequest("Invalid client request");
+                }
+                else
+                {
+                    return Ok(result);
+                }
+            }
+            else
+            {
+                return BadRequest("Invalid client request");
             }
         }
     }

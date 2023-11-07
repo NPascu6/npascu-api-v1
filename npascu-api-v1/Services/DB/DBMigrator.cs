@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using npascu_api_v1.Repository;
 
 namespace npascu_api_v1.Services.DB

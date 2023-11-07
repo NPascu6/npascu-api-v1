@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using npascu_api_v1.Models.DTOs.Item;
 using npascu_api_v1.Services.Interface;
-using System;
-using System.Collections.Generic;
-using static System.Net.WebRequestMethods;
 
 namespace npascu_api_v1.Controllers
 {
@@ -49,6 +45,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("CreateItem")]
         public ActionResult<ItemDto> CreateItem([FromBody] ItemDto itemDto)
         {
@@ -66,6 +63,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("UpdateItem/{id}")]
         public ActionResult<ItemDto> UpdateItem(int id, [FromBody] ItemDto itemDto)
         {
@@ -88,6 +86,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("DeleteItem/{id}")]
         public ActionResult DeleteItem(int id)
         {

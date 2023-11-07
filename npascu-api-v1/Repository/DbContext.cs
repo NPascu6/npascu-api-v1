@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using npascu_api_v1.Models.Entities;
-using System.Collections.Generic;
+using npascu_api_v1.Models.Entities.Auth;
 
 namespace npascu_api_v1.Repository
 {
@@ -14,5 +14,6 @@ namespace npascu_api_v1.Repository
         public DbSet<User> Users { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     }
 }

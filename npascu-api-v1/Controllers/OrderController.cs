@@ -21,6 +21,7 @@ namespace npascu_api_v1.Controllers
             _orderService = orderService;
         }
 
+        [Authorize]
         [HttpGet("GetOrders")]
         public ActionResult<IEnumerable<OrderDto>> GetOrders()
         {
@@ -43,6 +44,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("CreateOrder")]
         public ActionResult<OrderDto> CreateOrder([FromBody] CreateOrderDto orderDto)
         {
@@ -60,6 +62,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("GetOrder/{id}")]
         public ActionResult<OrderDto> GetOrder(int id)
         {
@@ -81,6 +84,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("UpdateOrder/{id}")]
         public ActionResult<OrderDto> UpdateOrder(int id, [FromBody] OrderDto orderDto)
         {
@@ -103,6 +107,7 @@ namespace npascu_api_v1.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("DeleteOrder/{id}")]
         public ActionResult DeleteOrder(int id)
         {
