@@ -21,16 +21,9 @@ namespace npascu_api_v1.Services.DB
 
                 try
                 {
-                    var pendingMigrations = dbContext.Database.GetPendingMigrations();
-                    if (pendingMigrations.Any())
-                    {
-                        dbContext.Database.Migrate();
-                        logger.LogInformation("Database migration successful.");
-                    }
-                    else
-                    {
-                        logger.LogInformation("No pending migrations, skipping database migration.");
-                    }
+
+                    dbContext.Database.Migrate();
+                    logger.LogInformation("Database migration successful.");
                 }
                 catch (Exception ex)
                 {
