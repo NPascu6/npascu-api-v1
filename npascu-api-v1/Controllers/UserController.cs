@@ -22,6 +22,7 @@ namespace npascu_api_v1.Controllers
             _userService = userService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("GetUsers")]
         public ActionResult<IEnumerable<UserDto>> GetUsers()
         {

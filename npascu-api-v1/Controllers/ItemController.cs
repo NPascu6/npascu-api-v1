@@ -26,6 +26,7 @@ namespace npascu_api_v1.Controllers
         /// Get all items
         /// </summary>
         /// <returns>A list of Items</returns>
+        [Authorize]
         [HttpGet("GetItems")]
         public ActionResult<IEnumerable<ItemDto>> GetItems()
         {
