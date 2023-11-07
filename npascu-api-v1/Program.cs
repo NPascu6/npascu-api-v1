@@ -1,15 +1,10 @@
 using npascu_api_v1.Services.DB;
 using npascu_api_v1.Services.Startup;
 
-IConfiguration configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .Build();
-
 var builder = WebApplication.CreateBuilder(args);
 var startup = new Startup();
 
 startup.AddDbContext(builder);
-startup.AddSwaggerConfig(builder);
 startup.AddServices(builder);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -19,6 +14,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
 });
+builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
@@ -33,12 +30,9 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
-
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

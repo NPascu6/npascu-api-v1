@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using npascu_api_v1.Repository;
 
 namespace npascu_api_v1.Services.DB
@@ -21,8 +22,16 @@ namespace npascu_api_v1.Services.DB
 
                 try
                 {
-                    dbContext.Database.Migrate();
-                    logger.LogInformation("Database migration successful.");
+                    var pendingMigrations = dbContext.Database.GetPendingMigrations();
+                    if (pendingMigrations.Any())
+                    {
+                        dbContext.Database.Migrate();
+                        logger.LogInformation("Database migration successful.");
+                    }
+                    else
+                    {
+                        logger.LogInformation("No pending migrations, skipping database migration.");
+                    }
                 }
                 catch (Exception ex)
                 {
