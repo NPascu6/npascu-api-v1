@@ -30,7 +30,9 @@ namespace npascu_api_v1.Repository.Implementation
             var user = new ApplicationUser
             {
                 Username = username,
-                Email = email
+                Email = email,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
 
             byte[] passwordHash, passwordSalt;

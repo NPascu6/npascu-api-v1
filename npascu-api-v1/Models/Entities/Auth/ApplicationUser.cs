@@ -2,7 +2,7 @@
 
 namespace npascu_api_v1.Models.Entities.Auth
 {
-    public class ApplicationUser
+    public class ApplicationUser: ModelBase
     {
         public int Id { get; set; }
         [Required]
