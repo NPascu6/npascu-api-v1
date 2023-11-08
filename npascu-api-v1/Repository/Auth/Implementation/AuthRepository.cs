@@ -90,6 +90,34 @@ namespace npascu_api_v1.Repository.Implementation
             }
         }
 
+        public bool DeleteUser(string email)
+        {
+            var user = _context.ApplicationUsers.SingleOrDefault(u => u.Email == email);
+            if (user != null)
+            {
+                _context.ApplicationUsers.Remove(user);
+                _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public IEnumerable<string>? GetUnvalidatedEmails()
+        {
+            var users = _context.ApplicationUsers.Where(u => u.IsVerified == false).DefaultIfEmpty();
+
+            var unvalidatedEmails = users.Select(u => u.Email).ToList();
+            return unvalidatedEmails;
+        }
+
+        public ApplicationUser GetUser(string email)
+        {
+            return _context.ApplicationUsers.SingleOrDefault(u => u.Email == email);
+        }
+
         private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
@@ -126,34 +154,6 @@ namespace npascu_api_v1.Repository.Implementation
         private bool IsUserTaken(string user)
         {
             return _context.ApplicationUsers.Any(u => u.Username == user);
-        }
-
-        public bool DeleteUser(string email)
-        {
-            var user = _context.ApplicationUsers.SingleOrDefault(u => u.Email == email);
-            if (user != null)
-            {
-                _context.ApplicationUsers.Remove(user);
-                _context.SaveChanges();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public IEnumerable<string>? GetUnvalidatedEmails()
-        {
-            var users = _context.ApplicationUsers.Where(u => u.IsVerified == false).DefaultIfEmpty();
-
-            var unvalidatedEmails = users.Select(u => u.Email).ToList();
-            return unvalidatedEmails;
-        }
-
-        public ApplicationUser GetUser(string email)
-        {
-            return _context.ApplicationUsers.SingleOrDefault(u => u.Email == email);
         }
     }
 }

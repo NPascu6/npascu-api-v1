@@ -82,6 +82,27 @@ namespace npascu_api_v1.Controllers.Auth
             }
         }
 
+        [HttpDelete]
+        [Route("delete")]
+        public IActionResult Delete([FromQuery] string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Invalid client request");
+            }
+
+            var result = _authService.DeleteUser(email);
+
+            if (result == null)
+            {
+                return BadRequest("Invalid client request");
+            }
+            else
+            {
+                return Ok(result);
+            }
+        }
+
 
         [HttpGet]
         [Route("validate-email")]
