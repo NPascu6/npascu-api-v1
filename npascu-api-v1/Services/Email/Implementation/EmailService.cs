@@ -15,6 +15,11 @@ namespace npascu_api_v1.Services.Email.Implementation
 
         public async Task<bool> SendEmailAsync(string toEmail, string subject, string message)
         {
+            
+            //get application environment
+
+
+
             var sendGridApiKey = _config.GetSection("SMTP").GetSection("Sendgrid").GetSection("ApiKey").Value;
             var senderEmail = _config.GetSection("SMTP").GetSection("Sendgrid").GetSection("SenderEmail").Value;
             var senderName = _config.GetSection("SMTP").GetSection("Sendgrid").GetSection("SenderName").Value;
