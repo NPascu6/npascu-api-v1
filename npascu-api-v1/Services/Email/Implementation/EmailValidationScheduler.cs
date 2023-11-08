@@ -16,7 +16,7 @@ namespace npascu_api_v1.Services.Email.Implementation
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            var checkInterval = TimeSpan.FromSeconds(10); // Adjust the interval as needed
+            var checkInterval = TimeSpan.FromSeconds(300); // Adjust the interval as needed
             timer = new Timer(state => CheckUnvalidatedEmails(), null, TimeSpan.Zero, checkInterval);
             return Task.CompletedTask;
         }
