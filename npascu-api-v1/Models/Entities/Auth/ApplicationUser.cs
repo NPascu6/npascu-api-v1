@@ -14,5 +14,7 @@ namespace npascu_api_v1.Models.Entities.Auth
         public byte[]? PasswordSalt { get; set; }
 
         public bool IsVerified { get; set; }
+
+        public string? VerificationToken { get; set; }
     }
 }

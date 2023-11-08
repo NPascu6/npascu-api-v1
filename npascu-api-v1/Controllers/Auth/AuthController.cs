@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using npascu_api_v1.Models.DTOs.Auth;
 using npascu_api_v1.Services.Interface;
+using System;
 
 namespace npascu_api_v1.Controllers.Auth
 {
@@ -24,7 +25,7 @@ namespace npascu_api_v1.Controllers.Auth
             }
             if (ModelState.IsValid)
             {
-                if(model.UserName == null || model.Password == null)
+                if (model.UserName == null || model.Password == null)
                 {
                     return BadRequest("Invalid client request");
                 }
@@ -50,7 +51,7 @@ namespace npascu_api_v1.Controllers.Auth
         [Route("register")]
         public IActionResult Register(RegisterModel model)
         {
-            
+
             if (ModelState.IsValid)
             {
                 if (model.UserName == null || model.Password == null || model.Email == null)
@@ -78,6 +79,28 @@ namespace npascu_api_v1.Controllers.Auth
             else
             {
                 return BadRequest("Invalid client request");
+            }
+        }
+
+
+        [HttpGet]
+        [Route("validate-email")]
+        public IActionResult ValidateEmail([FromQuery] string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Invalid client request");
+            }
+
+            var result = _authService.ValidateEmail(token);
+
+            if (result == null)
+            {
+                return BadRequest("Invalid client request");
+            }
+            else
+            {
+                return Ok(result);
             }
         }
     }

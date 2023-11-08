@@ -52,10 +52,13 @@ namespace npascu_api_v1.Services.Implementation
             {
                 return null;
             }
+            var registrationToken = GenerateRegistrationToken();
+            var user = _authRepository.RegisterUserAsync(username, email, password, registrationToken);
 
-            if (_authRepository.RegisterUserAsync(username, email, password) != null)
+            if (user != null)
             {
-                var sentRegistrationEmail = SendEmailVerification(email);
+           
+                var sentRegistrationEmail = SendEmailVerification(email , registrationToken);
                 _logger.LogInformation("Sent registration email: " + sentRegistrationEmail);
 
                 return Login(username, password);
@@ -63,6 +66,27 @@ namespace npascu_api_v1.Services.Implementation
             else
             {
                 return null;
+            }
+        }
+        
+        public bool ValidateEmail(string token)
+        {
+            // You should implement your email validation logic here, e.g., querying a database
+            // For this example, a basic hard-coded validation is used
+            if (token == null)
+            {
+                return false;
+            }
+
+            var user = _authRepository.ValidateEmail(token);
+
+            if (user != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -129,11 +153,10 @@ namespace npascu_api_v1.Services.Implementation
             return Regex.IsMatch(email, emailPattern);
         }
 
-        private bool SendEmailVerification(string email)
+        private bool SendEmailVerification(string email, string registrationToken)
         {
             try
             {
-                var registrationToken = GenerateRegistrationToken(); // Generate a registration token.
                 var emailVerificationPath = _config.GetSection("Authentication").GetSection("Swagger").GetSection("EmailVerificationPath").Value;
 
                 // Construct the email content with a link containing the registration token.

@@ -15,7 +15,7 @@ namespace npascu_api_v1.Repository.Implementation
             _context = context;
         }
 
-        public RegisterModel RegisterUserAsync(string username, string email, string password)
+        public ApplicationUser RegisterUserAsync(string username, string email, string password, string registrationToken)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
@@ -37,6 +37,7 @@ namespace npascu_api_v1.Repository.Implementation
             {
                 Username = username,
                 Email = email,
+                VerificationToken = registrationToken,
             };
 
             user.CreatedAt = DateTime.UtcNow;
@@ -49,11 +50,10 @@ namespace npascu_api_v1.Repository.Implementation
              _context.ApplicationUsers.Add(user);
              _context.SaveChanges();
 
-            return new RegisterModel()
+            return new ApplicationUser()
             {
-                Email = user.Email,
-                UserName = user.Username,
-                Password = password
+                Id = user.Id,
+                Email = user.Email
             };
         }
 
@@ -74,7 +74,23 @@ namespace npascu_api_v1.Repository.Implementation
             };
         }
 
-        public bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+        public bool ValidateEmail(string token)
+        {
+            var user = _context.ApplicationUsers.SingleOrDefault(u => u.VerificationToken == token);
+
+            if (user != null)
+            {
+                user.IsVerified = true;
+                _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
             {

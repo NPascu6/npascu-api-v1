@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using npascu_api_v1.Models.DTOs.Auth;
+using npascu_api_v1.Models.Entities.Auth;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Email.Interface;
 using npascu_api_v1.Services.Implementation;
@@ -66,14 +67,15 @@ namespace npascu_api_v1_tests.ServiceTests
             string username = "newUser";
             string email = "valid@example.com";
             string password = "newPassword";
+            string token = "registrationToken";
 
-            authRepository.Setup(repo => repo.RegisterUserAsync(username, email, password)).Returns((RegisterModel)null); // Replace User with your actual user object.
+            authRepository.Setup(repo => repo.RegisterUserAsync(username, email, password, token)).Returns((ApplicationUser)null); // Replace User with your actual user object.
 
             // Act
-            string token = authService.Register(username, email, password);
+            string te = authService.Register(username, email, password);
 
             // Assert
-            Assert.IsNull(token);
+            Assert.IsNull(te);
         }
     }
 }
