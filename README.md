@@ -141,5 +141,3 @@ These mappings simplify the transformation of data between DTOs and entity objec
 ## License
 
 This code is provided under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
-Please replace placeholders like `https://github.com/yourusername/npascu-api-v1.git` with the actual repository URL and adjust other details as needed for your specific project.
