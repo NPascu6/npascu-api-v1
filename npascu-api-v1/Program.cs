@@ -20,8 +20,8 @@ var app = builder.Build();
 
 // Apply database migrations
 var migrator = new DatabaseMigrator(app.Services);
-migrator.MigrateDatabase();
 
+migrator.MigrateDatabase();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>

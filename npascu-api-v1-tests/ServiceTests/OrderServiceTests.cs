@@ -5,11 +5,6 @@ using npascu_api_v1.Models.Entities;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Implementation;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace npascu_api_v1_tests.ServiceTests
 {

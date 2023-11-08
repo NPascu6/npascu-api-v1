@@ -1,15 +1,16 @@
-﻿using npascu_api_v1.Models.Entities.Auth;
+﻿using npascu_api_v1.Models.DTOs.Auth;
+using npascu_api_v1.Models.Entities.Auth;
 using npascu_api_v1.Repository.Interface;
 using System.Text;
 
 namespace npascu_api_v1.Repository.Implementation
 {
-    public class AuthReepository : IAuthRepository
+    public class AuthRepository : IAuthRepository
     {
 
         private readonly AppDbContext _context;
 
-        public AuthReepository(AppDbContext context)
+        public AuthRepository(AppDbContext context )
         {
             _context = context;
         }
@@ -27,13 +28,18 @@ namespace npascu_api_v1.Repository.Implementation
                 throw new ArgumentException("Email is taken."); ;
             }
 
+            if(IsUserTaken(username))
+            {
+                throw new ArgumentException("Username is taken."); ;
+            }   
+
             var user = new ApplicationUser
             {
                 Username = username,
                 Email = email,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
             };
+
+            user.CreatedAt = DateTime.UtcNow;
 
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(password, out passwordHash, out passwordSalt);
@@ -99,6 +105,39 @@ namespace npascu_api_v1.Repository.Implementation
         {
             // Check if the email is already in use by querying the database
             return _context.ApplicationUsers.Any(u => u.Email == email);
+        }
+
+        private bool IsUserTaken(string user)
+        {
+            return _context.ApplicationUsers.Any(u => u.Username == user);
+        }
+
+        public bool DeleteUser(string email)
+        {
+            var user = _context.ApplicationUsers.SingleOrDefault(u => u.Email == email);
+            if (user != null)
+            {
+                _context.ApplicationUsers.Remove(user);
+                _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public IEnumerable<string>? GetUnvalidatedEmails()
+        {
+            var users = _context.ApplicationUsers.Where(u => u.IsVerified == false).DefaultIfEmpty();
+
+            var unvalidatedEmails = users.Select(u => u.Email).ToList();
+            return unvalidatedEmails;
+        }
+
+        public ApplicationUser GetUser(string email)
+        {
+            return _context.ApplicationUsers.SingleOrDefault(u => u.Email == email);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace npascu_api_v1.Models.Entities
 {
-    public class Item: ModelBase
+    public class Item : ModelBase
     {
         public string? Name { get; set; }
         public string? Description { get; set; }

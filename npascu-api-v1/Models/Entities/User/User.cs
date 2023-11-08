@@ -1,6 +1,6 @@
-﻿namespace npascu_api_v1.Models.Entities
+﻿ namespace npascu_api_v1.Models.Entities
 {
-    public class User: ModelBase
+    public class User : ModelBase
     {
         public string? Username { get; set; }
         public string? Email { get; set; }

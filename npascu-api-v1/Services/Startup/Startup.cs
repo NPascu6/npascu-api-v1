@@ -5,6 +5,8 @@ using Microsoft.OpenApi.Models;
 using npascu_api_v1.Repository;
 using npascu_api_v1.Repository.Implementation;
 using npascu_api_v1.Repository.Interface;
+using npascu_api_v1.Services.Email.Implementation;
+using npascu_api_v1.Services.Email.Interface;
 using npascu_api_v1.Services.Implementation;
 using npascu_api_v1.Services.Interface;
 using System.Text;
@@ -42,7 +44,9 @@ namespace npascu_api_v1.Services.Startup
             builder.Services.AddScoped<IItemRepository, ItemRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IAuthRepository, AuthReepository>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+            builder.Services.AddHostedService<EmailValidationHostedService>();
         }
 
         public void ConfigureJWTForSwagger(WebApplicationBuilder builder)

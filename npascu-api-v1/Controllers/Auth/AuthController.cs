@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using npascu_api_v1.Models.Entities.Auth;
+using npascu_api_v1.Models.DTOs.Auth;
 using npascu_api_v1.Services.Interface;
 
 namespace npascu_api_v1.Controllers.Auth
@@ -8,12 +8,10 @@ namespace npascu_api_v1.Controllers.Auth
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _config;
         private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration config, IAuthService authService)
+        public AuthController(IAuthService authService)
         {
-            _config = config;
             _authService = authService;
         }
 
@@ -61,13 +59,20 @@ namespace npascu_api_v1.Controllers.Auth
                 }
 
                 var result = _authService.Register(model.UserName, model.Email, model.Password);
+
+                var response = new
+                {
+                    token = result,
+                    emailValidationSent = true
+                };
+
                 if (result == null)
                 {
                     return BadRequest("Invalid client request");
                 }
                 else
                 {
-                    return Ok(result);
+                    return Ok(response);
                 }
             }
             else

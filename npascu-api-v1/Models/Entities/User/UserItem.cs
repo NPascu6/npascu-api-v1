@@ -1,6 +1,6 @@
 ﻿namespace npascu_api_v1.Models.Entities
 {
-    public class UserItem: ModelBase
+    public class UserItem : ModelBase
     {
         public int UserId { get; set; }
         public User? User { get; set; }

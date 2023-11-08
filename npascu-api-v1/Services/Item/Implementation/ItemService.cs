@@ -3,8 +3,6 @@ using npascu_api_v1.Models.DTOs.Item;
 using npascu_api_v1.Models.Entities;
 using npascu_api_v1.Repository.Interface;
 using npascu_api_v1.Services.Interface;
-using System;
-using System.Collections.Generic;
 
 namespace npascu_api_v1.Services.Implementation
 {
