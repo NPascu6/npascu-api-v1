@@ -57,12 +57,6 @@ namespace npascu_api_v1.Services.Implementation
                 return "Email string is invalid.";
             }
 
-            var userExists = _authRepository.GetUser(email);
-            if (userExists.Username == username)
-            {
-                return "User already exists.";
-            }
-
             var registrationToken = GenerateRegistrationToken();
             _logger.LogInformation("Registration token generated: " + registrationToken);
 
