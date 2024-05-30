@@ -3,7 +3,7 @@ using npascu_api_v1.Repository.Interface;
 
 namespace npascu_api_v1.Repository.Implementation
 {
-    public class UserRepository: IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
         public UserRepository(AppDbContext context)
@@ -42,13 +42,7 @@ namespace npascu_api_v1.Repository.Implementation
         {
             try
             {
-                var existingUser = _context.Users.Find(userId);
-
-                if (existingUser == null)
-                {
-                    return null; // User with the specified ID not found
-                }
-
+                var existingUser = _context.Users.Find(userId) ?? throw new Exception("User doesn't exist.");
                 _context.Entry(existingUser).CurrentValues.SetValues(updatedUser);
                 _context.SaveChanges();
                 return existingUser;
@@ -85,7 +79,7 @@ namespace npascu_api_v1.Repository.Implementation
             try
             {
                 var user = _context.Users.Find(userId);
-                return user;
+                return user == null ? throw new Exception("User doesn't exist.") : user;
             }
             catch (Exception ex)
             {

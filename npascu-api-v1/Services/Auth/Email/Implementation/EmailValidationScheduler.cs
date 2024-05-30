@@ -1,11 +1,11 @@
 ﻿using npascu_api_v1.Repository.Interface;
 
-namespace npascu_api_v1.Services.Email.Implementation
+namespace npascu_api_v1.Services.Auth.Email.Implementation
 {
     public class EmailValidationHostedService : IHostedService, IDisposable
     {
         private readonly IServiceProvider _serviceProvider;
-        private Timer timer;
+        private Timer? timer;
         private ILogger<EmailValidationHostedService> _logger;
 
         public EmailValidationHostedService(IServiceProvider serviceProvider, ILogger<EmailValidationHostedService> logger)
@@ -16,7 +16,7 @@ namespace npascu_api_v1.Services.Email.Implementation
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            var checkInterval = TimeSpan.FromSeconds(300); // Adjust the interval as needed
+            var checkInterval = TimeSpan.FromSeconds(120);
             timer = new Timer(state => CheckUnvalidatedEmails(), null, TimeSpan.Zero, checkInterval);
             return Task.CompletedTask;
         }
@@ -36,30 +36,28 @@ namespace npascu_api_v1.Services.Email.Implementation
         {
             try
             {
-                using (var scope = _serviceProvider.CreateScope())
+                using var scope = _serviceProvider.CreateScope();
+                _logger.LogInformation("Checking unvalidated emails");
+                IEnumerable<string> unvalidatedEmails;
+                var _authRepository = scope.ServiceProvider.GetRequiredService<IAuthRepository>();
+                lock (_authRepository)
                 {
-                    _logger.LogInformation("Checking unvalidated emails");
-                    IEnumerable<string> unvalidatedEmails;
-                    var _authRepository = scope.ServiceProvider.GetRequiredService<IAuthRepository>();
-                    lock (_authRepository)
-                    {
-                        unvalidatedEmails = _authRepository.GetUnvalidatedEmails();
-                    }
+                    unvalidatedEmails = _authRepository.GetUnvalidatedEmails();
+                }
 
-                    if (unvalidatedEmails != null)
+                if (unvalidatedEmails != null)
+                {
+                    if (!unvalidatedEmails.Any())
                     {
-                        if (!unvalidatedEmails.Any())
+                        _logger.LogInformation("No unvalidated emails found");
+                    }
+                    else
+                    {
+                        foreach (var email in unvalidatedEmails)
                         {
-                            _logger.LogInformation("No unvalidated emails found");
-                        }
-                        else
-                        {
-                            foreach (var email in unvalidatedEmails)
+                            if (TryDeleteUser(email))
                             {
-                                if (TryDeleteUser(email))
-                                {
-                                    _logger.LogInformation($"User with email {email} deleted.");
-                                }
+                                _logger.LogInformation($"User with email {email} deleted.");
                             }
                         }
                     }
@@ -76,26 +74,23 @@ namespace npascu_api_v1.Services.Email.Implementation
         {
             try
             {
-                using (var scope = _serviceProvider.CreateScope())
+                using var scope = _serviceProvider.CreateScope();
+
+                var user = new Models.Entities.Auth.ApplicationUser();
+                var _authRepository = scope.ServiceProvider.GetRequiredService<IAuthRepository>();
+
+                user = _authRepository.GetUser(email);
+
+                if (user != null)
                 {
-                    var user = new Models.Entities.Auth.ApplicationUser();
-                    var _authRepository = scope.ServiceProvider.GetRequiredService<IAuthRepository>();
-
-                    user = _authRepository.GetUser(email);
-
-                    if (user != null)
+                    var cutoffTime = user.CreatedAt.AddMinutes(5);
+                    if (cutoffTime < DateTime.UtcNow)
                     {
-                        var cutoffTime = user.CreatedAt.AddHours(24);
-                        if (cutoffTime < DateTime.UtcNow)
-                        {
 
-                            _authRepository.DeleteUser(email);
-                            return true;
-                        }
+                        _authRepository.DeleteUser(email);
+                        return true;
                     }
-
                 }
-
             }
             catch (Exception e)
             {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using npascu_api_v1.Repository.Interface;
-using npascu_api_v1.Services.Email.Interface;
+using npascu_api_v1.Services.Auth.Email.Interface;
 using npascu_api_v1.Services.Interface;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -45,7 +45,7 @@ namespace npascu_api_v1.Services.Implementation
             else
             {
                 _logger.LogInformation("User is not valid: " + username);
-                return null;
+                return "User is not valid.";
             }
         }
 
@@ -54,27 +54,34 @@ namespace npascu_api_v1.Services.Implementation
 
             if (!IsValidEmail(email))
             {
-                return null;
+                return "Email string is invalid.";
             }
             var registrationToken = GenerateRegistrationToken();
             _logger.LogInformation("Registration token generated: " + registrationToken);
 
-            var user = _authRepository.RegisterUserAsync(username, email, password, registrationToken);
-            _logger.LogInformation("User registered: " + user);
-
-            if (user != null)
+            try
             {
+                var user = _authRepository.RegisterUserAsync(username, email, password, registrationToken);
+                _logger.LogInformation("User registered: " + user);
 
-                var sentRegistrationEmail = SendEmailVerification(email, registrationToken);
-                _logger.LogInformation("Sent registration email: " + sentRegistrationEmail);
+                if (user != null)
+                {
 
-                _logger.LogInformation("Loging in: " + user);
-                return Login(username, password);
+                    var sentRegistrationEmail = SendEmailVerification(email, registrationToken);
+                    _logger.LogInformation("Sent registration email: " + sentRegistrationEmail);
+
+                    _logger.LogInformation("Loging in: " + user);
+                    return Login(username, password);
+                }
+                else
+                {
+                    _logger.LogInformation("User not registered: " + user);
+                    return "User is not registered.";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogInformation("User not registered: " + user);
-                return null;
+                return ex.Message.ToString();
             }
         }
 
@@ -197,7 +204,7 @@ namespace npascu_api_v1.Services.Implementation
             {
                 _logger.LogInformation("Sending email verification: " + email);
                 var emailVerificationPath = _config.GetSection("Authentication").GetSection("Swagger").GetSection("EmailVerificationPath").Value;
-
+                var emailDeVerificationPath = _config.GetSection("Authentication").GetSection("Swagger").GetSection("UnverifyEmailPath").Value;
                 // Construct the email content with a link containing the registration token.
                 var emailContent = $@"
 <!DOCTYPE html>
@@ -240,6 +247,7 @@ namespace npascu_api_v1.Services.Implementation
             <a class='button' href='{emailVerificationPath}{registrationToken}'>Verify Your Email</a>
             <p>This link will expire in the next 24 hours.</p>
             <p>If you have any questions or need assistance, please feel free to contact our support team by replying to this email.</p>
+            <p>If you want to opt out of my personal api just click the link: <a href=`{emailDeVerificationPath}'</a></p>
             <p>Welcome to my community!</p>
         </div>
     </div>
@@ -248,7 +256,7 @@ namespace npascu_api_v1.Services.Implementation
 ";
 
                 // Send the email to the user's email address.
-                var response = _emailService.SendEmailAsync(email, "Email Verification", emailContent).Result;
+                var response = _emailService.SendEmailAsync(email, "Email Verification for NPASCU API", emailContent).Result;
 
                 if (!response)
                 {

@@ -10,6 +10,6 @@ namespace npascu_api_v1.Repository.Interface
         bool ValidateEmail(string token);
         ApplicationUser GetUser(string email);
         bool DeleteUser(string email);
-        IEnumerable<string>? GetUnvalidatedEmails();
+        List<string> GetUnvalidatedEmails();
     }
 }

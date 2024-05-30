@@ -1,4 +1,4 @@
-﻿namespace npascu_api_v1.Services.Email.Interface
+﻿namespace npascu_api_v1.Services.Auth.Email.Interface
 {
     public interface IEmailService
     {

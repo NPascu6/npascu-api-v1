@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using npascu_api_v1.Models.DTOs.Auth;
 using npascu_api_v1.Services.Interface;
-using System;
 
 namespace npascu_api_v1.Controllers.Auth
 {
@@ -61,6 +60,11 @@ namespace npascu_api_v1.Controllers.Auth
 
                 var result = _authService.Register(model.UserName, model.Email, model.Password);
 
+                if (result == "Email is taken.")
+                {
+                    return BadRequest("Email is taken.");
+                }
+
                 var response = new
                 {
                     token = result,
@@ -93,7 +97,7 @@ namespace npascu_api_v1.Controllers.Auth
 
             var result = _authService.DeleteUser(email);
 
-            if (result == null)
+            if (result == false)
             {
                 return BadRequest("Invalid client request");
             }
@@ -115,7 +119,7 @@ namespace npascu_api_v1.Controllers.Auth
 
             var result = _authService.ValidateEmail(token);
 
-            if (result == null)
+            if (result == false)
             {
                 return BadRequest("Invalid client request");
             }

@@ -10,7 +10,7 @@ namespace npascu_api_v1.Repository.Implementation
 
         private readonly AppDbContext _context;
 
-        public AuthRepository(AppDbContext context )
+        public AuthRepository(AppDbContext context)
         {
             _context = context;
         }
@@ -19,19 +19,18 @@ namespace npascu_api_v1.Repository.Implementation
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-                // Return an error or throw an exception for missing values
                 throw new ArgumentException("Username, email, and password are required.");
             }
 
-            if(IsEmailTaken(email))
+            if (IsEmailTaken(email))
             {
-                throw new ArgumentException("Email is taken."); ;
+                throw new ArgumentException("Email is taken.");
             }
 
-            if(IsUserTaken(username))
+            if (IsUserTaken(username))
             {
-                throw new ArgumentException("Username is taken."); ;
-            }   
+                throw new ArgumentException("Username is taken.");
+            }
 
             var user = new ApplicationUser
             {
@@ -47,8 +46,8 @@ namespace npascu_api_v1.Repository.Implementation
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
-             _context.ApplicationUsers.Add(user);
-             _context.SaveChanges();
+            _context.ApplicationUsers.Add(user);
+            _context.SaveChanges();
 
             return new ApplicationUser()
             {
@@ -59,13 +58,17 @@ namespace npascu_api_v1.Repository.Implementation
 
         public LoginModel LoginUserAsync(string username, string password)
         {
-            var user =  _context.ApplicationUsers.SingleOrDefault(x => x.Username == username);
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                return new LoginModel();
+            }
+            var user = _context.ApplicationUsers.SingleOrDefault(x => x.Username == username);
 
-            if (user == null)
-                return null;
+            if (user == null || user.PasswordHash == null || user.PasswordSalt == null)
+                return new LoginModel();
 
             if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-                return null;
+                return new LoginModel();
 
             return new LoginModel()
             {
@@ -105,17 +108,41 @@ namespace npascu_api_v1.Repository.Implementation
             }
         }
 
-        public IEnumerable<string>? GetUnvalidatedEmails()
+        public List<string> GetUnvalidatedEmails()
         {
-            var users = _context.ApplicationUsers.Where(u => u.IsVerified == false).DefaultIfEmpty();
+            List<ApplicationUser> users = _context.ApplicationUsers.Where(u => u.IsVerified == false).ToList();
 
-            var unvalidatedEmails = users.Select(u => u.Email).ToList();
-            return unvalidatedEmails;
+            if (users != null && users.Count > 0)
+            {
+                List<string> unvalidatedEmails = new();
+
+                foreach (var item in users)
+                {
+                    if (item != null && item.Email != null)
+                    {
+                        unvalidatedEmails.Add(item.Email);
+                    }
+
+                }
+                if (unvalidatedEmails.Count > 0)
+                {
+                    return unvalidatedEmails;
+                }
+                else
+                {
+                    return new List<string>();
+                }
+
+            }
+            else
+            {
+                return new List<string>();
+            }
         }
 
         public ApplicationUser GetUser(string email)
         {
-            return _context.ApplicationUsers.SingleOrDefault(u => u.Email == email);
+            return _context.ApplicationUsers.Single(u => u.Email == email);
         }
 
         private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
@@ -136,7 +163,7 @@ namespace npascu_api_v1.Repository.Implementation
             return true;
         }
 
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512())
             {

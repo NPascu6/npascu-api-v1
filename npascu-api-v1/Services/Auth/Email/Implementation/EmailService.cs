@@ -1,10 +1,10 @@
-﻿using npascu_api_v1.Services.Email.Interface;
+﻿using npascu_api_v1.Services.Auth.Email.Interface;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace npascu_api_v1.Services.Email.Implementation
+namespace npascu_api_v1.Services.Auth.Email.Implementation
 {
-    public class EmailService: IEmailService
+    public class EmailService : IEmailService
     {
         private readonly IConfiguration _config;
 
