@@ -60,15 +60,15 @@ namespace npascu_api_v1.Repository.Implementation
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                return new LoginModel();
+                throw new ArgumentException("Username and password are required.");
             }
             var user = _context.ApplicationUsers.SingleOrDefault(x => x.Username == username);
 
             if (user == null || user.PasswordHash == null || user.PasswordSalt == null)
-                return new LoginModel();
+                throw new ArgumentException("User not found.");
 
             if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-                return new LoginModel();
+                throw new ArgumentException("Invalid password.");
 
             return new LoginModel()
             {

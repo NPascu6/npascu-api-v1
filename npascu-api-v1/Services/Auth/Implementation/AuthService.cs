@@ -56,6 +56,13 @@ namespace npascu_api_v1.Services.Implementation
             {
                 return "Email string is invalid.";
             }
+
+            var userExists = _authRepository.GetUser(email);
+            if (userExists.Username == username)
+            {
+                return "User already exists.";
+            }
+
             var registrationToken = GenerateRegistrationToken();
             _logger.LogInformation("Registration token generated: " + registrationToken);
 
@@ -245,9 +252,8 @@ namespace npascu_api_v1.Services.Implementation
             <p>Dear User,</p>
             <p>Thank you for registering with our .NET Core API. To activate your account, please click the button below:</p>
             <a class='button' href='{emailVerificationPath}{registrationToken}'>Verify Your Email</a>
-            <p>This link will expire in the next 24 hours.</p>
+            <p>This link will expire in the next 5 minutes.</p>
             <p>If you have any questions or need assistance, please feel free to contact our support team by replying to this email.</p>
-            <p>If you want to opt out of my personal api just click the link: <a href=`{emailDeVerificationPath}'</a></p>
             <p>Welcome to my community!</p>
         </div>
     </div>
@@ -256,7 +262,7 @@ namespace npascu_api_v1.Services.Implementation
 ";
 
                 // Send the email to the user's email address.
-                var response = _emailService.SendEmailAsync(email, "Email Verification for NPASCU API", emailContent).Result;
+                var response = _emailService.SendEmailAsync(email, "Email Verification NPascu API", emailContent).Result;
 
                 if (!response)
                 {

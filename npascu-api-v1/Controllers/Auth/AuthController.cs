@@ -29,16 +29,24 @@ namespace npascu_api_v1.Controllers.Auth
                     return BadRequest("Invalid client request");
                 }
 
-                var token = _authService.Login(model.UserName, model.Password);
-                if (token == null || token == "")
+                try
                 {
-                    return Unauthorized();
-                }
-                else
-                {
-                    return Ok(new { token });
+                    var token = _authService.Login(model.UserName, model.Password);
+                    if (token == null || token == "")
+                    {
+                        return Unauthorized();
+                    }
+                    else
+                    {
+                        return Ok(new { token });
 
+                    }
                 }
+                catch (Exception e)
+                {
+                    return BadRequest(e.Message);
+                }
+
             }
             else
             {
@@ -63,6 +71,11 @@ namespace npascu_api_v1.Controllers.Auth
                 if (result == "Email is taken.")
                 {
                     return BadRequest("Email is taken.");
+                }
+
+                if (result == "User already exists.")
+                {
+                    return BadRequest("User already exists.");
                 }
 
                 var response = new
