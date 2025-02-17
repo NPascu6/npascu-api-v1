@@ -1,33 +1,39 @@
 using npascu_api_v1.Modules.DTOs;
 using System.Net;
+using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
+using npascu_api_v1.Modules.Hub;
 
 namespace npascu_api_v1.Modules.Background
 {
     public class FinnhubRestService : BackgroundService
     {
         private readonly ILogger<FinnhubRestService> _logger;
-        private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
+        private readonly IHubContext<QuotesHub> _hubContext;
         private const string BaseUrl = "https://finnhub.io/api/v1/quote";
 
         // With 10 symbols and a limit of 60 requests/minute,
-        // poll each symbol every 10 seconds (10 * 6 = 60 req/min).
+        // poll each symbol every 10 seconds.
         private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(10);
 
         // List of symbols to poll.
         private readonly List<string> _symbols;
 
+        // Optionally, keep a cache of the latest quotes.
+        public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; }
+
         public FinnhubRestService(IConfiguration configuration, ILogger<FinnhubRestService> logger,
-            HttpClient httpClient)
+            HttpClient httpClient, IHubContext<QuotesHub> hubContext)
         {
-            _configuration = configuration;
             _logger = logger;
             _httpClient = httpClient;
-            _apiKey = _configuration["FINNHUB_API_KEY"] ?? throw new Exception("Finhub API key not configured.");
+            _hubContext = hubContext;
+            _apiKey = configuration["FINNHUB_API_KEY"]
+                      ?? throw new Exception("Finhub API key not configured.");
 
-            // Use the comma-separated symbols list from configuration.
-            var symbolsConfig = _configuration["FINNHUB_SYMBOLS"];
+            var symbolsConfig = configuration["FINNHUB_SYMBOLS"];
             if (!string.IsNullOrWhiteSpace(symbolsConfig))
             {
                 _symbols = symbolsConfig.Split(',')
@@ -37,7 +43,7 @@ namespace npascu_api_v1.Modules.Background
             }
             else
             {
-                _symbols = ["AAPL", "MSFT", "GOOGL"];
+                _symbols = new List<string> { "AAPL", "MSFT", "GOOGL" };
             }
 
             if (_symbols.Count == 0)
@@ -49,13 +55,13 @@ namespace npascu_api_v1.Modules.Background
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Starting concurrent polling for symbols.");
-            // Launch a dedicated polling loop for each symbol.
+            _logger.LogInformation("Starting concurrent polling for symbols via timers.");
+
+            // Create a dedicated polling loop for each symbol.
             var pollingTasks = _symbols.Select(symbol => PollSymbolLoop(symbol, stoppingToken));
             await Task.WhenAll(pollingTasks);
         }
 
-        // Polling loop for a specific symbol.
         private async Task PollSymbolLoop(string symbol, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting polling loop for symbol {Symbol}.", symbol);
@@ -77,7 +83,6 @@ namespace npascu_api_v1.Modules.Background
             _logger.LogInformation("Polling loop stopped for symbol {Symbol}.", symbol);
         }
 
-        // Poll Finnhub for a given symbol.
         private async Task PollFinnhubAsync(string symbol)
         {
             var url = $"{BaseUrl}?symbol={symbol}&token={_apiKey}";
@@ -89,9 +94,16 @@ namespace npascu_api_v1.Modules.Background
                     var quote = await response.Content.ReadFromJsonAsync<FinnhubQuoteDto>();
                     if (quote != null)
                     {
+                        // Update the cache.
+                        LatestQuotes[symbol] = quote;
+
+                        // Log the full quote.
                         _logger.LogInformation(
                             "Symbol: {Symbol}, Price: {Price}, High: {High}, Low: {Low}, Open: {Open}, PrevClose: {PrevClose}, Timestamp: {Timestamp}",
                             symbol, quote.c, quote.h, quote.l, quote.o, quote.pc, quote.t);
+
+                        // Push the update via SignalR.
+                        await _hubContext.Clients.All.SendAsync("ReceiveQuote", symbol, quote);
                     }
                     else
                     {
