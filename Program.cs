@@ -37,14 +37,24 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            []
+            Array.Empty<string>()
         }
     });
 });
 
+// Configure CORS to allow any origin, method, and header.
+// You can replace AllowAnyOrigin with WithOrigins("https://your-react-app.com") to restrict it.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Production", policy =>
+    {
+        policy.WithOrigins("https://pascu.io", "www.pascu.io")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 // Add authentication
-// Load JWT configuration
 var jwtKey = builder.Configuration["JWT_KEY"] ?? throw new InvalidOperationException("JWT Key is missing");
 var key = Encoding.UTF8.GetBytes(jwtKey);
 
@@ -53,7 +63,7 @@ builder.Services.AddSignalR();
 builder.Services.AddHttpClient<FinnhubRestService>();
 
 builder.Services.AddHostedService<FinnhubRestService>();
-// Add authentication
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -71,17 +81,17 @@ builder.Services.AddAuthorization();
 
 // Get database connection string
 var connectionString = ConnectionStringHelper.GetConnectionString(builder.Configuration);
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
-
 app.UseDeveloperExceptionPage();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// Enable CORS before other middleware
+app.UseCors("Production");
 
 app.UseRouting();
 app.UseAuthentication();
@@ -89,12 +99,12 @@ app.UseAuthorization();
 
 app.MapHub<QuotesHub>("/quotesHub");
 
-// Automatically apply migrations
+// Automatically apply migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var configuration = services.GetRequiredService<IConfiguration>();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
     await DbInitializer.SeedAdminAsync(dbContext, configuration);
 }
