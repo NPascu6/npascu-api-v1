@@ -21,8 +21,9 @@ namespace npascu_api_v1.Modules.Background
         // List of symbols to poll.
         private readonly List<string> _symbols;
 
-        // Optionally, keep a cache of the latest quotes.
-        public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; }
+        // Initialize the cache of the latest quotes.
+        public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; } =
+            new ConcurrentDictionary<string, FinnhubQuoteDto>();
 
         public FinnhubRestService(IConfiguration configuration, ILogger<FinnhubRestService> logger,
             HttpClient httpClient, IHubContext<QuotesHub> hubContext)
@@ -30,8 +31,7 @@ namespace npascu_api_v1.Modules.Background
             _logger = logger;
             _httpClient = httpClient;
             _hubContext = hubContext;
-            _apiKey = configuration["FINNHUB_API_KEY"]
-                      ?? throw new Exception("Finhub API key not configured.");
+            _apiKey = configuration["FINNHUB_API_KEY"] ?? throw new Exception("Finhub API key not configured.");
 
             var symbolsConfig = configuration["FINNHUB_SYMBOLS"];
             if (!string.IsNullOrWhiteSpace(symbolsConfig))
