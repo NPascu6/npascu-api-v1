@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using npascu_api_v1.Data;
+using npascu_api_v1.Modules.Background;
 using npascu_api_v1.Modules.Services;
 using npascu_api_v1.Startup;
 
@@ -47,7 +48,8 @@ var jwtKey = builder.Configuration["JWT_KEY"] ?? throw new InvalidOperationExcep
 var key = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddSingleton<ITokenService, TokenService>();
-
+builder.Services.AddHttpClient<FinnhubRestService>();
+builder.Services.AddHostedService<FinnhubRestService>();
 // Add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
