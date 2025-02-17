@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("npascu-api-v1")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f4e2baeba1461674bc59f831f38bdf61c297116")]
 [assembly: System.Reflection.AssemblyProductAttribute("npascu-api-v1")]
 [assembly: System.Reflection.AssemblyTitleAttribute("npascu-api-v1")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
