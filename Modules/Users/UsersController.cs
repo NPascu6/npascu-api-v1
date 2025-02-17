@@ -58,4 +58,22 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
 
         return true;
     }
+
+    [HttpDelete("{id:int}")]
+    [Authorize]
+    public async Task<bool> DeleteUser(int id)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        context.Users.Remove(user);
+
+        await context.SaveChangesAsync();
+
+        return true;
+    }
 }
