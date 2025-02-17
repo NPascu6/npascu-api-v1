@@ -1,4 +1,6 @@
-public class User
+namespace npascu_api_v1.Data.Models;
+
+public record User
 {
     public int Id { get; set; }
     public string Name { get; set; }

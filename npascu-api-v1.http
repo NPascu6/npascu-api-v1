@@ -1,6 +1,0 @@
-@npascu_api_v1_HostAddress = http://localhost:5252
-
-GET {{npascu_api_v1_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
