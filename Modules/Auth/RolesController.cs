@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using npascu_api_v1.Data.Models;
@@ -9,22 +10,33 @@ namespace npascu_api_v1.Modules.Auth;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController(IConfiguration configuration) : ControllerBase
+public class RolesController(IConfiguration configuration) : ControllerBase
 {
-    [HttpPost("token")]
-    public IActionResult GenerateToken([FromBody] UserCredentials credentials)
+    [HttpGet("admin-data")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult GetAdminData()
     {
-        var adminUsername = configuration["ADMIN_USERNAME"] ?? "";
-        if (adminUsername == null) throw new ArgumentNullException(nameof(adminUsername));
+        return Ok(new { Message = "Only admins can access this!" });
+    }
 
-        var adminPassword = configuration["ADMIN_PASSWORD"] ?? "";
-        if (adminPassword == null) throw new ArgumentNullException(nameof(adminPassword));
+    [HttpGet("user-data")]
+    [Authorize(Roles = "User")] // Only users with "User" role can access
+    public IActionResult GetUserData()
+    {
+        return Ok(new { Message = "Only users can access this!" });
+    }
 
-        if (credentials.Username != adminUsername || credentials.Password != adminPassword)
-        {
-            return Unauthorized();
-        }
+    [HttpGet("all-data")]
+    [Authorize]
+    public IActionResult GetAllData()
+    {
+        return Ok(new { Message = "All authenticated users can access this!" });
+    }
 
+    [HttpPost("new-role")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult AddRole([FromBody] UserCredentials credentials)
+    {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(configuration["JWT_KEY"] ?? string.Empty);
         var tokenDescriptor = new SecurityTokenDescriptor
