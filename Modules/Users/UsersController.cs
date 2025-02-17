@@ -2,78 +2,86 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using npascu_api_v1.Data;
-using npascu_api_v1.Data.Models;
+using npascu_api_v1.Modules.DTOs;
+using npascu_api_v1.Modules.Services;
 
-namespace npascu_api_v1.Modules.Users;
-
-[Route("api/[controller]")]
-[ApiController]
-[Authorize]
-public class UsersController(ApplicationDbContext context) : ControllerBase
+namespace npascu_api_v1.Modules.Users
 {
-    [HttpGet]
-    [Authorize]
-    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize(Roles = "Admin")]
+    public class UsersController(ApplicationDbContext context) : ControllerBase
     {
-        return await context.Users.ToListAsync();
-    }
-
-    [HttpGet("{id:int}")]
-    [Authorize]
-    public async Task<ActionResult<User>> GetUser(int id)
-    {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-        return user ?? throw new InvalidOperationException($"User Not Found.");
-    }
-
-    [HttpPost]
-    [Authorize]
-    public async Task<ActionResult<User>> PostUser(User user)
-    {
-        context.Users.Add(user);
-        await context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-    }
-
-    [HttpPut("{id:int}")]
-    [Authorize]
-    public async Task<bool> PutUser(int id, User user)
-    {
-        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (existingUser == null)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return false;
+            var users = await context.Users
+                .Include(u => u.UserRoles)
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    AuthProvider = u.PasswordHash != null ? "Local" : "Google",
+                    UserRoles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+                })
+                .ToListAsync();
+            return Ok(users);
         }
 
-        existingUser.Name = user.Name;
-        existingUser.Email = user.Email;
-        existingUser.PasswordHash = user.PasswordHash;
-
-        context.Entry(existingUser).State = EntityState.Modified;
-
-        await context.SaveChangesAsync();
-
-        return true;
-    }
-
-    [HttpDelete("{id:int}")]
-    [Authorize]
-    public async Task<bool> DeleteUser(int id)
-    {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (user == null)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<UserDto>> GetUser(int id)
         {
-            return false;
+            var user = await context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound($"User with id {id} not found.");
+            }
+
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                AuthProvider = user.PasswordHash != null ? "Local" : "Google"
+            };
+            return Ok(userDto);
         }
 
-        context.Users.Remove(user);
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
+        {
+            var user = await context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound($"User with id {id} not found.");
+            }
 
-        await context.SaveChangesAsync();
+            user.Name = request.Name;
+            user.Email = request.Email;
 
-        return true;
+            if (user.PasswordHash != null && !string.IsNullOrEmpty(request.Password))
+            {
+                user.PasswordHash = PasswordHelper.HashPassword(request.Password);
+            }
+
+            context.Entry(user).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound($"User with id {id} not found.");
+            }
+
+            context.Users.Remove(user);
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }

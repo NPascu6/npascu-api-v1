@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using npascu_api_v1.Data;
+using npascu_api_v1.Modules.Services;
 using npascu_api_v1.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +46,8 @@ builder.Services.AddSwaggerGen(c =>
 var jwtKey = builder.Configuration["JWT_KEY"] ?? throw new InvalidOperationException("JWT Key is missing");
 var key = Encoding.UTF8.GetBytes(jwtKey);
 
+builder.Services.AddSingleton<ITokenService, TokenService>();
+
 // Add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -82,8 +85,11 @@ app.UseAuthorization();
 // Automatically apply migrations
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
+    var configuration = services.GetRequiredService<IConfiguration>();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
+    await DbInitializer.SeedAdminAsync(dbContext, configuration);
 }
 
 app.MapControllers();
