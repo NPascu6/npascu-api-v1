@@ -41,8 +41,9 @@ builder.Services.AddSwaggerGen(c =>
 
 
 // Add authentication
-var jwtSettings = builder.Configuration.GetSection("JWT_KEY");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key is missing"));
+// Load JWT configuration
+var jwtKey = builder.Configuration["JWT_KEY"] ?? throw new InvalidOperationException("JWT Key is missing");
+var key = Encoding.UTF8.GetBytes(jwtKey);
 
 // Add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -50,12 +51,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateIssuer = false,
+            ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
