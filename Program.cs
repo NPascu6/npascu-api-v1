@@ -42,15 +42,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure CORS to allow any origin, method, and header.
-// You can replace AllowAnyOrigin with WithOrigins("https://your-react-app.com") to restrict it.
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Production", policy =>
+    options.AddPolicy("AllowSpecificOrigin", policy =>
     {
-        policy.WithOrigins("https://pascu.io", "www.pascu.io")
+        policy.WithOrigins("https://pascu.io")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -89,13 +88,10 @@ var app = builder.Build();
 app.UseDeveloperExceptionPage();
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// Enable CORS before other middleware
-app.UseCors("Production");
-
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("AllowSpecificOrigin");
 
 app.MapHub<QuotesHub>("/quotesHub");
 
