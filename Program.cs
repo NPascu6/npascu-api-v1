@@ -4,9 +4,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using npascu_api_v1.Data;
-using npascu_api_v1.Modules.Background;
-using npascu_api_v1.Modules.Hub;
+using npascu_api_v1.Modules.Quote;
 using npascu_api_v1.Modules.Services;
+using npascu_api_v1.Modules.Services.AlphaVantage;
+using npascu_api_v1.Modules.Services.FinnHub;
 using npascu_api_v1.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,9 +60,11 @@ var key = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSignalR();
-builder.Services.AddHttpClient<FinnhubRestService>();
-
-builder.Services.AddHostedService<FinnhubRestService>();
+builder.Services.AddHttpClient<FinnHubRestService>();
+//builder.Services.AddHttpClient<AlphaVantageRestService>();
+builder.Services.AddHostedService<FinnHubRestService>();
+builder.Services.AddHostedService<FinnHubWebSocketService>();
+//builder.Services.AddHostedService<AlphaVantageRestService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using npascu_api_v1.Modules.Background;
+using npascu_api_v1.Modules.Services.FinnHub;
 
 namespace npascu_api_v1.Modules.Quote
 {
@@ -12,14 +12,14 @@ namespace npascu_api_v1.Modules.Quote
         public IActionResult GetQuotes()
         {
             // Return the latest quotes as a JSON object.
-            return Ok(FinnhubRestService.LatestQuotes);
+            return Ok(FinnHubRestService.LatestQuotes);
         }
 
         // GET: api/quotes/{symbol}
         [HttpGet("{symbol}")]
         public IActionResult GetQuote(string symbol)
         {
-            if (FinnhubRestService.LatestQuotes.TryGetValue(symbol, out var quote))
+            if (FinnHubRestService.LatestQuotes.TryGetValue(symbol, out var quote))
             {
                 return Ok(quote);
             }

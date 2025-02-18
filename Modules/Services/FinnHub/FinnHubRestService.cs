@@ -1,14 +1,14 @@
-using npascu_api_v1.Modules.DTOs;
+using System.Collections.Concurrent;
 using System.Net;
 using Microsoft.AspNetCore.SignalR;
-using System.Collections.Concurrent;
-using npascu_api_v1.Modules.Hub;
+using npascu_api_v1.Modules.DTOs;
+using npascu_api_v1.Modules.Quote;
 
-namespace npascu_api_v1.Modules.Background
+namespace npascu_api_v1.Modules.Services.FinnHub
 {
-    public class FinnhubRestService : BackgroundService
+    public class FinnHubRestService : BackgroundService
     {
-        private readonly ILogger<FinnhubRestService> _logger;
+        private readonly ILogger<FinnHubRestService> _logger;
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
         private readonly IHubContext<QuotesHub> _hubContext;
@@ -25,7 +25,7 @@ namespace npascu_api_v1.Modules.Background
         public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; } =
             new ConcurrentDictionary<string, FinnhubQuoteDto>();
 
-        public FinnhubRestService(IConfiguration configuration, ILogger<FinnhubRestService> logger,
+        public FinnHubRestService(IConfiguration configuration, ILogger<FinnHubRestService> logger,
             HttpClient httpClient, IHubContext<QuotesHub> hubContext)
         {
             _logger = logger;
@@ -43,7 +43,7 @@ namespace npascu_api_v1.Modules.Background
             }
             else
             {
-                _symbols = new List<string> { "AAPL", "MSFT", "GOOGL" };
+                _symbols = ["AAPL", "MSFT", "GOOGL"];
             }
 
             if (_symbols.Count == 0)
