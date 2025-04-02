@@ -12,16 +12,13 @@ namespace npascu_api_v1.Modules.Services.FinnHub
     {
         private readonly ILogger<FinnHubWebSocketService> _logger;
         private readonly IHubContext<QuotesHub> _hubContext;
-        private readonly string _apiKey;
         private readonly List<string> _symbols;
-        private ClientWebSocket _webSocket;
+        private readonly ClientWebSocket _webSocket;
         private readonly Uri _socketUri;
 
-        // A cache to store the latest trade info by symbol.
-        public static ConcurrentDictionary<string, FinnhubTradeDto> LatestTrades { get; } =
-            new ConcurrentDictionary<string, FinnhubTradeDto>();
+        private static ConcurrentDictionary<string, FinnhubTradeDto> LatestTrades { get; } =
+            new();
 
-        // Publish interval for aggregated updates.
         private readonly TimeSpan _publishInterval = TimeSpan.FromSeconds(1);
 
         public FinnHubWebSocketService(IConfiguration configuration,
@@ -30,7 +27,7 @@ namespace npascu_api_v1.Modules.Services.FinnHub
         {
             _logger = logger;
             _hubContext = hubContext;
-            _apiKey = configuration["FINNHUB_API_KEY"] ?? throw new Exception("Finhub API key not configured.");
+            var apiKey = configuration["FINNHUB_API_KEY"] ?? throw new Exception("Finhub API key not configured.");
 
             var symbolsConfig = configuration["FINNHUB_SYMBOLS"];
             if (!string.IsNullOrWhiteSpace(symbolsConfig))
@@ -42,10 +39,10 @@ namespace npascu_api_v1.Modules.Services.FinnHub
             }
             else
             {
-                _symbols = new List<string> { "AAPL", "MSFT", "GOOGL" };
+                _symbols = ["AAPL", "MSFT", "GOOGL"];
             }
 
-            _socketUri = new Uri($"wss://ws.finnhub.io?token={_apiKey}");
+            _socketUri = new Uri($"wss://ws.finnhub.io?token={apiKey}");
             _webSocket = new ClientWebSocket();
         }
 
@@ -55,20 +52,17 @@ namespace npascu_api_v1.Modules.Services.FinnHub
 
             try
             {
-                // Connect to the WebSocket endpoint.
                 await _webSocket.ConnectAsync(_socketUri, stoppingToken);
                 _logger.LogInformation("Connected to Finnhub WebSocket.");
 
-                // Subscribe to each symbol.
                 foreach (var symbol in _symbols)
                 {
-                    var subscribeMessage = new { type = "subscribe", symbol = symbol };
-                    string messageJson = JsonSerializer.Serialize(subscribeMessage);
+                    var subscribeMessage = new { type = "subscribe", symbol };
+                    var messageJson = JsonSerializer.Serialize(subscribeMessage);
                     await SendMessageAsync(messageJson, stoppingToken);
                     _logger.LogInformation("Subscribed to symbol {Symbol}", symbol);
                 }
 
-                // Start both the message receiver and the publisher tasks.
                 var receiverTask = ReceiveMessagesLoop(stoppingToken);
                 var publisherTask = PublishUpdatesLoop(stoppingToken);
 
@@ -87,10 +81,6 @@ namespace npascu_api_v1.Modules.Services.FinnHub
             await _webSocket.SendAsync(segment, WebSocketMessageType.Text, true, cancellationToken);
         }
 
-        /// <summary>
-        /// Receives messages from the WebSocket, updates the cache,
-        /// and logs errors if any occur.
-        /// </summary>
         private async Task ReceiveMessagesLoop(CancellationToken cancellationToken)
         {
             var buffer = new byte[4096];
@@ -109,7 +99,6 @@ namespace npascu_api_v1.Modules.Services.FinnHub
                         break;
                     }
 
-                    // Assuming messages fit into our buffer.
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     ProcessMessage(message);
                 }
@@ -176,13 +165,10 @@ namespace npascu_api_v1.Modules.Services.FinnHub
             {
                 try
                 {
-                    // Wait for the publish interval.
                     await Task.Delay(_publishInterval, cancellationToken);
 
-                    // For each symbol, send the latest trade data.
                     foreach (var kvp in LatestTrades)
                     {
-                        // The update is sent once per interval for each symbol.
                         await _hubContext.Clients.All.SendAsync("ReceiveTrade", kvp.Key, kvp.Value, cancellationToken);
                     }
                 }
@@ -200,7 +186,7 @@ namespace npascu_api_v1.Modules.Services.FinnHub
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping Finnhub WebSocket Service.");
-            if (_webSocket != null && _webSocket.State == WebSocketState.Open)
+            if (_webSocket.State == WebSocketState.Open)
             {
                 await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Service stopping", cancellationToken);
             }

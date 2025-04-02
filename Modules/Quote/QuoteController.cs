@@ -11,7 +11,6 @@ namespace npascu_api_v1.Modules.Quote
         [HttpGet]
         public IActionResult GetQuotes()
         {
-            // Return the latest quotes as a JSON object.
             return Ok(FinnHubRestService.LatestQuotes);
         }
 

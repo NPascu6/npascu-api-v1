@@ -32,4 +32,33 @@ namespace npascu_api_v1.Modules.DTOs
         [JsonPropertyName("10. change percent")]
         public string? ChangePercent { get; set; }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

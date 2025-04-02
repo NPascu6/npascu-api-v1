@@ -1,70 +1,24 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.OpenApi.Models;
-using npascu_api_v1.Data;
 using npascu_api_v1.Modules.Quote;
-using npascu_api_v1.Modules.Services;
-using npascu_api_v1.Modules.Services.AlphaVantage;
 using npascu_api_v1.Modules.Services.FinnHub;
+using npascu_api_v1.Modules.Services.Token;
 using npascu_api_v1.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add essential services
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigin", policy =>
-    {
-        policy.WithOrigins("https://pascu.io")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
-
-// Add authentication
 var jwtKey = builder.Configuration["JWT_KEY"] ?? throw new InvalidOperationException("JWT Key is missing");
 var key = Encoding.UTF8.GetBytes(jwtKey);
 
+builder.AddCustomCors();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerConfig();
 builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient<FinnHubRestService>();
-//builder.Services.AddHttpClient<AlphaVantageRestService>();
 builder.Services.AddHostedService<FinnHubRestService>();
 builder.Services.AddHostedService<FinnHubWebSocketService>();
-//builder.Services.AddHostedService<AlphaVantageRestService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -81,11 +35,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Get database connection string
-var connectionString = ConnectionStringHelper.GetConnectionString(builder.Configuration);
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
 var app = builder.Build();
 
 app.UseDeveloperExceptionPage();
@@ -97,16 +46,6 @@ app.UseAuthorization();
 app.UseCors("AllowSpecificOrigin");
 
 app.MapHub<QuotesHub>("/quotesHub");
-
-// Automatically apply migrations and seed data
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var configuration = services.GetRequiredService<IConfiguration>();
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
-    await DbInitializer.SeedAdminAsync(dbContext, configuration);
-}
 
 app.MapControllers();
 app.Run();

@@ -1,6 +1,6 @@
 using npascu_api_v1.Data.Models;
 
-namespace npascu_api_v1.Modules.Services
+namespace npascu_api_v1.Modules.Services.Token
 {
     public interface ITokenService
     {

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Konscious.Security.Cryptography;
 
-namespace npascu_api_v1.Modules.Services
+namespace npascu_api_v1.Common.Utils
 {
     public static class PasswordHelper
     {

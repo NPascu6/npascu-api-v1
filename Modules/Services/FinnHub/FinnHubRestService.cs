@@ -14,16 +14,10 @@ namespace npascu_api_v1.Modules.Services.FinnHub
         private readonly IHubContext<QuotesHub> _hubContext;
         private const string BaseUrl = "https://finnhub.io/api/v1/quote";
 
-        // With 10 symbols and a limit of 60 requests/minute,
-        // poll each symbol every 10 seconds.
-        private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(10);
-
-        // List of symbols to poll.
         private readonly List<string> _symbols;
 
-        // Initialize the cache of the latest quotes.
         public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; } =
-            new ConcurrentDictionary<string, FinnhubQuoteDto>();
+            new();
 
         public FinnHubRestService(IConfiguration configuration, ILogger<FinnHubRestService> logger,
             HttpClient httpClient, IHubContext<QuotesHub> hubContext)
@@ -43,7 +37,7 @@ namespace npascu_api_v1.Modules.Services.FinnHub
             }
             else
             {
-                _symbols = ["AAPL", "MSFT", "GOOGL"];
+                _symbols = new List<string> { "AAPL", "MSFT", "GOOGL" };
             }
 
             if (_symbols.Count == 0)
@@ -55,32 +49,22 @@ namespace npascu_api_v1.Modules.Services.FinnHub
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Starting concurrent polling for symbols via timers.");
+            _logger.LogInformation("Starting sequential round-robin polling for symbols.");
+            var symbolIndex = 0;
 
-            // Create a dedicated polling loop for each symbol.
-            var pollingTasks = _symbols.Select(symbol => PollSymbolLoop(symbol, stoppingToken));
-            await Task.WhenAll(pollingTasks);
-        }
-
-        private async Task PollSymbolLoop(string symbol, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Starting polling loop for symbol {Symbol}.", symbol);
-
-            while (!cancellationToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await PollFinnhubAsync(symbol);
+                if (_symbols.Any())
+                {
+                    var symbol = _symbols[symbolIndex];
+                    await PollFinnhubAsync(symbol);
 
-                try
-                {
-                    await Task.Delay(_pollingInterval, cancellationToken);
+                    symbolIndex = (symbolIndex + 1) % _symbols.Count;
                 }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
+
+                // One call per second
+                await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
             }
-
-            _logger.LogInformation("Polling loop stopped for symbol {Symbol}.", symbol);
         }
 
         private async Task PollFinnhubAsync(string symbol)
@@ -94,15 +78,12 @@ namespace npascu_api_v1.Modules.Services.FinnHub
                     var quote = await response.Content.ReadFromJsonAsync<FinnhubQuoteDto>();
                     if (quote != null)
                     {
-                        // Update the cache.
                         LatestQuotes[symbol] = quote;
 
-                        // Log the full quote.
                         _logger.LogInformation(
                             "Symbol: {Symbol}, Price: {Price}, High: {High}, Low: {Low}, Open: {Open}, PrevClose: {PrevClose}, Timestamp: {Timestamp}",
                             symbol, quote.c, quote.h, quote.l, quote.o, quote.pc, quote.t);
 
-                        // Push the update via SignalR.
                         await _hubContext.Clients.All.SendAsync("ReceiveQuote", symbol, quote);
                     }
                     else
