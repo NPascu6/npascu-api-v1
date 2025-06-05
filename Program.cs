@@ -3,6 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using npascu_api_v1.Modules.Quote;
 using npascu_api_v1.Modules.Services.FinnHub;
+using npascu_api_v1.Modules.Services.IexCloud;
+using npascu_api_v1.Modules.Services.Polygon;
+using npascu_api_v1.Modules.Services.YahooFinance;
 using npascu_api_v1.Modules.Services.Token;
 using npascu_api_v1.Startup;
 
@@ -19,6 +22,12 @@ builder.Services.AddSignalR();
 builder.Services.AddHttpClient<FinnHubRestService>();
 builder.Services.AddHostedService<FinnHubRestService>();
 builder.Services.AddHostedService<FinnHubWebSocketService>();
+builder.Services.AddHttpClient<IexCloudRestService>();
+builder.Services.AddHostedService<IexCloudRestService>();
+builder.Services.AddHttpClient<PolygonRestService>();
+builder.Services.AddHostedService<PolygonRestService>();
+builder.Services.AddHttpClient<YahooFinanceRestService>();
+builder.Services.AddHostedService<YahooFinanceRestService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
