@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "http": {
@@ -7,7 +7,17 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5252",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT_KEY": "dummy-jwt-key",
+        "ADMIN_EMAIL": "admin@example.com",
+        "ADMIN_PASSWORD": "P@ssword1",
+        "GOOGLE_CLIENT_ID": "dummy-google-client-id.apps.googleusercontent.com",
+        "FINNHUB_API_KEY": "demo",
+        "FINNHUB_SYMBOLS": "AAPL,MSFT,GOOGL",
+        "ALPHA_VANTAGE_API_KEY": "demo",
+        "ALPHA_VANTAGE_SYMBOLS": "IBM,AAPL,MSFT,NVDA,TSLA",
+        "CorsOrigins": "http://localhost:3000",
+        "ConnectionStrings__DefaultConnection": "postgres://user:password@localhost:5432/db"
       }
     },
     "https": {
@@ -16,7 +26,17 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:7164;http://localhost:5252",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT_KEY": "dummy-jwt-key",
+        "ADMIN_EMAIL": "admin@example.com",
+        "ADMIN_PASSWORD": "P@ssword1",
+        "GOOGLE_CLIENT_ID": "dummy-google-client-id.apps.googleusercontent.com",
+        "FINNHUB_API_KEY": "demo",
+        "FINNHUB_SYMBOLS": "AAPL,MSFT,GOOGL",
+        "ALPHA_VANTAGE_API_KEY": "demo",
+        "ALPHA_VANTAGE_SYMBOLS": "IBM,AAPL,MSFT,NVDA,TSLA",
+        "CorsOrigins": "http://localhost:3000",
+        "ConnectionStrings__DefaultConnection": "postgres://user:password@localhost:5432/db"
       }
     }
   }
