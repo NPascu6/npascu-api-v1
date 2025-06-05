@@ -6,6 +6,7 @@ using npascu_api_v1.Modules.Services.FinnHub;
 using npascu_api_v1.Modules.Services.IexCloud;
 using npascu_api_v1.Modules.Services.Polygon;
 using npascu_api_v1.Modules.Services.YahooFinance;
+using npascu_api_v1.Modules.Services.AlphaVantage;
 using npascu_api_v1.Modules.Services.Token;
 using npascu_api_v1.Startup;
 
@@ -28,6 +29,7 @@ builder.Services.AddHttpClient<PolygonRestService>();
 builder.Services.AddHostedService<PolygonRestService>();
 builder.Services.AddHttpClient<YahooFinanceRestService>();
 builder.Services.AddHostedService<YahooFinanceRestService>();
+builder.Services.AddHttpClient<AlphaVantageHistoricalService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using npascu_api_v1.Modules.Services.AlphaVantage;
 using npascu_api_v1.Modules.Services.FinnHub;
 
 namespace npascu_api_v1.Modules.Quote
@@ -7,6 +8,13 @@ namespace npascu_api_v1.Modules.Quote
     [Route("api/[controller]")]
     public class QuotesController : ControllerBase
     {
+        private readonly AlphaVantageHistoricalService _historicalService;
+
+        public QuotesController(AlphaVantageHistoricalService historicalService)
+        {
+            _historicalService = historicalService;
+        }
+
         // GET: api/quotes
         [HttpGet]
         public IActionResult GetQuotes()
@@ -21,6 +29,19 @@ namespace npascu_api_v1.Modules.Quote
             if (FinnHubRestService.LatestQuotes.TryGetValue(symbol, out var quote))
             {
                 return Ok(quote);
+            }
+
+            return NotFound();
+        }
+
+        // GET: api/quotes/historical/{symbol}
+        [HttpGet("historical/{symbol}")]
+        public async Task<IActionResult> GetHistorical(string symbol)
+        {
+            var data = await _historicalService.GetDailyHistoryAsync(symbol);
+            if (data != null)
+            {
+                return Ok(data);
             }
 
             return NotFound();
