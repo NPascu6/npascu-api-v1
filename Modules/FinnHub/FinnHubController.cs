@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using npascu_api_v1.Modules.Services.FinnHub;
+using System.Text.Json;
 
 namespace npascu_api_v1.Modules.FinnHub;
 
@@ -13,6 +14,12 @@ public class FinnHubController : ControllerBase
         return Ok(FinnHubRestService.LatestQuotes);
     }
 
+    [HttpGet("tickers")]
+    public IActionResult GetTickers()
+    {
+        return Ok(FinnHubRestService.Symbols);
+    }
+
     [HttpGet("{symbol}")]
     public IActionResult GetQuote(string symbol)
     {
@@ -22,5 +29,31 @@ public class FinnHubController : ControllerBase
         }
 
         return NotFound();
+    }
+
+    [HttpGet("stream")]
+    public async Task StreamQuotes(CancellationToken cancellationToken)
+    {
+        Response.Headers.Append("Content-Type", "text/event-stream");
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            foreach (var (symbol, quote) in FinnHubRestService.LatestQuotes)
+            {
+                var json = JsonSerializer.Serialize(new { symbol, quote });
+                await Response.WriteAsync($"data: {json}\n\n", cancellationToken);
+            }
+
+            await Response.Body.FlushAsync(cancellationToken);
+
+            try
+            {
+                await Task.Delay(1000, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+        }
     }
 }
