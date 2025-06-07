@@ -15,6 +15,9 @@ public class FinnHubRestService : BackgroundService
     private static readonly string BaseUrl = "https://finnhub.io/api/v1/quote";
     private readonly List<string> _symbols;
 
+    public static IReadOnlyList<string> Symbols { get; private set; } =
+        Array.Empty<string>();
+
     public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; } = new();
 
     public FinnHubRestService(
@@ -33,6 +36,8 @@ public class FinnHubRestService : BackgroundService
         _symbols = configuration["FINNHUB_SYMBOLS"]?
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList() ?? ["AAPL", "MSFT", "GOOGL"];
+
+        Symbols = _symbols.AsReadOnly();
 
         if (_symbols.Count == 0)
         {
