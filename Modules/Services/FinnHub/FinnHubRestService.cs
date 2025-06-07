@@ -55,30 +55,20 @@ public class FinnHubRestService : BackgroundService
 
         _logger.LogInformation("Starting sequential round-robin polling for symbols.");
 
-        var symbolQueue = new Queue<string>(_symbols);
-
-        await PollSymbolsSequentially(symbolQueue, stoppingToken);
+        await PollSymbolsSequentially(stoppingToken);
     }
 
-    private async Task PollSymbolsSequentially(Queue<string> symbolQueue, CancellationToken cancellationToken)
+    private async Task PollSymbolsSequentially(CancellationToken cancellationToken)
     {
         try
         {
-            if (symbolQueue.Count == 0)
+            for (var index = 0; !cancellationToken.IsCancellationRequested; index = (index + 1) % _symbols.Count)
             {
-                foreach (var symbol in _symbols)
-                {
-                    symbolQueue.Enqueue(symbol);
-                }
+                var symbol = _symbols[index];
+                await PollFinnhubAsync(symbol, cancellationToken);
+
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
-
-            var nextSymbol = symbolQueue.Dequeue();
-            await PollFinnhubAsync(nextSymbol, cancellationToken);
-
-            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-
-            // Recursively continue
-            await PollSymbolsSequentially(symbolQueue, cancellationToken);
         }
         catch (OperationCanceledException)
         {
