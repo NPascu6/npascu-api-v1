@@ -1,4 +1,4 @@
-namespace Api.DTOs;
+namespace Domain.DTOs;
 
 public class FinnhubQuoteDto
 {

@@ -5,6 +5,7 @@ using Domain.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
+using Infrastructure.Clients;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Api.Background;
@@ -32,6 +33,7 @@ builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient<FinnhubRestService>();
 builder.Services.AddHostedService<FinnhubRestService>();
+builder.Services.AddHttpClient<IFinnhubClient, FinnhubClient>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -109,6 +111,7 @@ app.MapGet("/v1/allowances/{canton}/{year:int}", async (string canton, int year,
    .WithOpenApi();
 
 app.MapHub<QuotesHub>("/quotesHub");
+app.MapHub<MarketHub>("/hubs/market");
 app.MapControllers();
 
 app.Run();
