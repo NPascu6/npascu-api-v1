@@ -4,7 +4,7 @@ services:
     build: .
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__Postgres: Host=db;Database=swisstax;Username=postgres;Password=postgres
+      CONNECTION_STRING: Host=db;Database=swisstax;Username=postgres;Password=postgres
     ports:
       - "10000:10000"
     depends_on:
