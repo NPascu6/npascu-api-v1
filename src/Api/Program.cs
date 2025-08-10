@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.IO;
+using System.Reflection;
 using Domain.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -7,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Api.Background;
 using Api.Hubs;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +20,12 @@ builder.Host.UseSerilog((ctx, lc) => lc
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "SwissTax API", Version = "v1" });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<DeductionRequestValidator>();
 builder.Services.AddControllers();
@@ -39,7 +48,10 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors();
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+   .WithName("GetHealth")
+   .WithTags("Health")
+   .WithOpenApi();
 
 app.MapPost("/v1/deductions/estimate", async (DeductionRequest req, IValidator<DeductionRequest> validator, AppDbContext db) =>
 {
@@ -79,7 +91,10 @@ app.MapPost("/v1/deductions/estimate", async (DeductionRequest req, IValidator<D
     result.TotalTax = result.FederalTax + result.CantonalTax + result.CommunalTax;
 
     return Results.Ok(result);
-});
+})
+   .WithName("EstimateDeductions")
+    .WithTags("Deductions")
+    .WithOpenApi();
 
 app.MapGet("/v1/allowances/{canton}/{year:int}", async (string canton, int year, AppDbContext db) =>
 {
@@ -88,7 +103,10 @@ app.MapGet("/v1/allowances/{canton}/{year:int}", async (string canton, int year,
     var doc = JsonDocument.Parse(rules.JsonRules);
     var ded = doc.RootElement.GetProperty("deductions");
     return Results.Ok(JsonSerializer.Deserialize<object>(ded.GetRawText())!);
-});
+})
+   .WithName("GetAllowances")
+   .WithTags("Allowances")
+   .WithOpenApi();
 
 app.MapHub<QuotesHub>("/quotesHub");
 app.MapControllers();
