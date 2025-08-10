@@ -39,6 +39,7 @@ builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient<FinnhubRestService>();
 builder.Services.AddHostedService<FinnhubRestService>();
+builder.Services.Configure<FinnhubOptions>(builder.Configuration.GetSection("Finnhub"));
 builder.Services.AddHttpClient<IFinnhubClient, FinnhubClient>();
 builder.Services.AddCors(options =>
 {
