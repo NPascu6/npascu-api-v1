@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Api.Background;
+using Domain.DTOs;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
+using Api.SwaggerExamples;
 
 namespace Api.Controllers;
 
@@ -17,7 +21,10 @@ public class QuotesController : ControllerBase
     /// </summary>
     /// <returns>A collection of quotes keyed by symbol.</returns>
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [SwaggerOperation(Summary = "Gets the latest quotes for all tracked symbols.")]
+    [ProducesResponseType(typeof(Dictionary<string, FinnhubQuoteDto>), StatusCodes.Status200OK)]
+    [SwaggerResponse(StatusCodes.Status200OK, "Quotes keyed by symbol", typeof(Dictionary<string, FinnhubQuoteDto>))]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(QuotesExample))]
     public IActionResult GetQuotes()
     {
         return Ok(FinnhubRestService.LatestQuotes);
@@ -29,8 +36,12 @@ public class QuotesController : ControllerBase
     /// <param name="symbol">Ticker symbol.</param>
     /// <returns>The latest quote if available.</returns>
     [HttpGet("{symbol}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [SwaggerOperation(Summary = "Gets the latest quote for a specified symbol.")]
+    [ProducesResponseType(typeof(FinnhubQuoteDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerResponse(StatusCodes.Status200OK, "Latest quote", typeof(FinnhubQuoteDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Quote not found")]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(QuoteExample))]
     public IActionResult GetQuote(string symbol)
     {
         if (FinnhubRestService.LatestQuotes.TryGetValue(symbol, out var quote))

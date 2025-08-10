@@ -1,6 +1,9 @@
 using Domain.DTOs;
 using Infrastructure.Clients;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
+using Api.SwaggerExamples;
 
 namespace Api.Controllers;
 
@@ -24,8 +27,12 @@ public class SnapshotController : ControllerBase
     /// </summary>
     /// <param name="symbol">The market symbol.</param>
     [HttpGet("{symbol}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [SwaggerOperation(Summary = "Returns the latest quote snapshot.")]
+    [ProducesResponseType(typeof(FinnhubQuoteDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerResponse(StatusCodes.Status200OK, "Quote snapshot", typeof(FinnhubQuoteDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Snapshot not found")]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(QuoteExample))]
     public async Task<ActionResult<FinnhubQuoteDto>> Get(string symbol)
     {
         var snap = await _client.GetQuoteAsync(symbol);
