@@ -12,6 +12,9 @@ using Api.Background;
 using Api.Hubs;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Any;
+using Swashbuckle.AspNetCore.Filters;
+using Api.SwaggerExamples;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +29,10 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "SwissTax API", Version = "v1" });
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    options.EnableAnnotations();
+    options.ExampleFilters();
 });
+builder.Services.AddSwaggerExamplesFromAssemblyOf<QuoteExample>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<DeductionRequestValidator>();
 builder.Services.AddControllers();
@@ -53,7 +59,26 @@ app.UseCors();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
    .WithName("GetHealth")
    .WithTags("Health")
-   .WithOpenApi();
+   .WithOpenApi(op =>
+   {
+       op.Summary = "Health check";
+       op.Description = "Returns API availability status.";
+       op.Responses["200"] = new OpenApiResponse
+       {
+           Description = "OK",
+           Content =
+           {
+               ["application/json"] = new OpenApiMediaType
+               {
+                   Example = new OpenApiObject
+                   {
+                       ["status"] = new OpenApiString("ok")
+                   }
+               }
+           }
+       };
+       return op;
+   });
 
 app.MapPost("/v1/deductions/estimate", async (DeductionRequest req, IValidator<DeductionRequest> validator, AppDbContext db) =>
 {
@@ -96,7 +121,45 @@ app.MapPost("/v1/deductions/estimate", async (DeductionRequest req, IValidator<D
 })
    .WithName("EstimateDeductions")
     .WithTags("Deductions")
-    .WithOpenApi();
+    .WithOpenApi(op =>
+    {
+        op.Summary = "Estimate tax deductions";
+        op.RequestBody = new OpenApiRequestBody
+        {
+            Content =
+            {
+                ["application/json"] = new OpenApiMediaType
+                {
+                    Example = new OpenApiObject
+                    {
+                        ["canton"] = new OpenApiString("ZH"),
+                        ["year"] = new OpenApiInteger(2024),
+                        ["grossIncome"] = new OpenApiDouble(100000),
+                        ["pillar3aContributions"] = new OpenApiDouble(6883)
+                    }
+                }
+            }
+        };
+        op.Responses["200"] = new OpenApiResponse
+        {
+            Description = "Tax estimate",
+            Content =
+            {
+                ["application/json"] = new OpenApiMediaType
+                {
+                    Example = new OpenApiObject
+                    {
+                        ["estimatedTaxableIncome"] = new OpenApiDouble(93117),
+                        ["federalTax"] = new OpenApiDouble(5000),
+                        ["cantonalTax"] = new OpenApiDouble(3000),
+                        ["communalTax"] = new OpenApiDouble(2000),
+                        ["totalTax"] = new OpenApiDouble(10000)
+                    }
+                }
+            }
+        };
+        return op;
+    });
 
 app.MapGet("/v1/allowances/{canton}/{year:int}", async (string canton, int year, AppDbContext db) =>
 {
@@ -108,7 +171,25 @@ app.MapGet("/v1/allowances/{canton}/{year:int}", async (string canton, int year,
 })
    .WithName("GetAllowances")
    .WithTags("Allowances")
-   .WithOpenApi();
+   .WithOpenApi(op =>
+   {
+       op.Summary = "Get deduction allowances";
+       op.Responses["200"] = new OpenApiResponse
+       {
+            Description = "Allowances",
+            Content =
+            {
+                ["application/json"] = new OpenApiMediaType
+                {
+                    Example = new OpenApiObject
+                    {
+                        ["pillar3a_max"] = new OpenApiDouble(6883)
+                    }
+                }
+            }
+       };
+       return op;
+   });
 
 app.MapHub<QuotesHub>("/quotesHub");
 app.MapHub<MarketHub>("/hubs/market");

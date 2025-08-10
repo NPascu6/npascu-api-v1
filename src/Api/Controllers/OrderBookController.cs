@@ -1,6 +1,9 @@
 using Domain.DTOs;
 using Infrastructure.Clients;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
+using Api.SwaggerExamples;
 
 namespace Api.Controllers;
 
@@ -25,8 +28,12 @@ public class OrderBookController : ControllerBase
     /// <param name="symbol">The market symbol.</param>
     /// <param name="depth">Optional depth.</param>
     [HttpGet("{symbol}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [SwaggerOperation(Summary = "Returns the current order book for a symbol.")]
+    [ProducesResponseType(typeof(FinnhubOrderBookDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerResponse(StatusCodes.Status200OK, "Order book snapshot", typeof(FinnhubOrderBookDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Book not found")]
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(OrderBookExample))]
     public async Task<ActionResult<FinnhubOrderBookDto>> Get(string symbol, [FromQuery] int? depth)
     {
         var book = await _client.GetOrderBookAsync(symbol, depth);
