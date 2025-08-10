@@ -1,5 +1,5 @@
 import { MarketDataProvider } from './MarketDataProvider';
-import { Quote, Candle, TickerLite } from '../types';
+import { Quote, Candle, TickerLite, OrderBookSnapshot } from '../types';
 import { logProviderRequest } from '../db';
 
 export class ProviderRouter implements MarketDataProvider {
@@ -16,6 +16,10 @@ export class ProviderRouter implements MarketDataProvider {
 
   async searchSymbols(query: string): Promise<TickerLite[]> {
     return this.tryProviders(p => p.searchSymbols(query), undefined, 'searchSymbols');
+  }
+
+  async getOrderBookSnapshot(symbol: string, depth: number = 25): Promise<OrderBookSnapshot> {
+    return this.tryProviders(p => p.getOrderBookSnapshot(symbol, depth), symbol, 'getOrderBookSnapshot');
   }
 
   private async tryProviders<T>(fn: (p: MarketDataProvider) => Promise<T>, symbol: string | undefined, endpoint: string): Promise<T> {

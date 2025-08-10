@@ -1,5 +1,5 @@
 import { MarketDataProvider } from './MarketDataProvider';
-import { Quote, Candle, TickerLite } from '../types';
+import { Quote, Candle, TickerLite, OrderBookSnapshot } from '../types';
 
 const API_BASE = 'https://finnhub.io/api/v1';
 
@@ -71,5 +71,20 @@ export class FinnhubProvider implements MarketDataProvider {
       name: r.description,
       exchange: r.exchange
     }));
+  }
+
+  async getOrderBookSnapshot(symbol: string, depth: number = 25): Promise<OrderBookSnapshot> {
+    const url = `${API_BASE}/stock/orderbook?symbol=${encodeURIComponent(symbol)}&token=${this.apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Finnhub order book error: ${res.status}`);
+    const data = await res.json() as any;
+    return {
+      symbol,
+      ts: data.ts ? new Date(data.ts * 1000) : new Date(),
+      bids: (data.bids || []).slice(0, depth).map((b: any) => ({ price: b[0], size: b[1] })),
+      asks: (data.asks || []).slice(0, depth).map((a: any) => ({ price: a[0], size: a[1] })),
+      provider: this.name,
+      meta: { raw: data }
+    };
   }
 }

@@ -41,3 +41,17 @@ export interface ProviderRequestLog {
   error?: string;
   meta?: Record<string, any>;
 }
+
+export interface OrderBookLevel {
+  price: number;
+  size: number;
+}
+
+export interface OrderBookSnapshot {
+  symbol: string;
+  ts: Date;
+  bids: OrderBookLevel[];
+  asks: OrderBookLevel[];
+  provider: string;
+  meta?: Record<string, any>;
+}
