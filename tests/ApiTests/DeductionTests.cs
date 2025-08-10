@@ -1,9 +1,13 @@
 using System.Linq;
+using System.Net;
 using System.Net.Http.Json;
+using Api;
 using Infrastructure;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Api.Background;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit;
 
 namespace ApiTests;
@@ -18,9 +22,12 @@ public class DeductionTests : IClassFixture<WebApplicationFactory<Program>>
         {
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                if (descriptor != null) services.Remove(descriptor);
+                services.RemoveAll<DbContextOptions<AppDbContext>>();
+                services.RemoveAll<AppDbContext>();
                 services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("tests"));
+
+                var hosted = services.SingleOrDefault(d => d.ImplementationType == typeof(FinnhubRestService));
+                if (hosted != null) services.Remove(hosted);
             });
         });
     }
@@ -32,4 +39,5 @@ public class DeductionTests : IClassFixture<WebApplicationFactory<Program>>
         var resp = await client.GetAsync("/health");
         Assert.True(resp.IsSuccessStatusCode);
     }
+
 }

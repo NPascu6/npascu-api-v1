@@ -62,16 +62,19 @@ app.MapPost("/v1/deductions/estimate", async (DeductionRequest req, IValidator<D
         EstimatedTaxableIncome = taxable
     };
 
-    var federal = await db.FederalBrackets.FirstAsync(b => b.Year == req.Year);
+    var federal = await db.FederalBrackets.FirstOrDefaultAsync(b => b.Year == req.Year);
+    if (federal == null) return Results.BadRequest(new { error = "Federal brackets not found" });
     var fedBrackets = JsonSerializer.Deserialize<List<Bracket>>(federal.BracketsJson) ?? new();
     result.FederalTax = TaxCalculator.ComputeProgressiveTax(taxable, fedBrackets.Select(b => (b.up_to, b.rate)));
 
-    var cantonal = await db.CantonalBrackets.FirstAsync(b => b.Canton == req.Canton && b.Year == req.Year);
+    var cantonal = await db.CantonalBrackets.FirstOrDefaultAsync(b => b.Canton == req.Canton && b.Year == req.Year);
+    if (cantonal == null) return Results.BadRequest(new { error = "Cantonal brackets not found" });
     var cantBrackets = JsonSerializer.Deserialize<List<Bracket>>(cantonal.BracketsJson) ?? new();
     var cantTax = TaxCalculator.ComputeProgressiveTax(taxable, cantBrackets.Select(b => (b.up_to, b.rate)));
     result.CantonalTax = cantTax;
 
-    var multiplier = await db.MunicipalityMultipliers.FirstAsync(m => m.Canton == req.Canton && m.Year == req.Year);
+    var multiplier = await db.MunicipalityMultipliers.FirstOrDefaultAsync(m => m.Canton == req.Canton && m.Year == req.Year);
+    if (multiplier == null) return Results.BadRequest(new { error = "Municipality multiplier not found" });
     result.CommunalTax = decimal.Round(cantTax * multiplier.Multiplier, 2);
     result.TotalTax = result.FederalTax + result.CantonalTax + result.CommunalTax;
 

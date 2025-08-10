@@ -14,8 +14,9 @@ public class FinnhubRestService : BackgroundService
     private readonly string _apiKey;
     private readonly IHubContext<QuotesHub> _hubContext;
     private const string BaseUrl = "https://finnhub.io/api/v1/quote";
+    private const int MaxRequestsPerMinute = 60;
 
-    private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(10);
+    private readonly TimeSpan _pollingInterval;
     private readonly List<string> _symbols;
 
     public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; } = new();
@@ -45,6 +46,11 @@ public class FinnhubRestService : BackgroundService
         {
             _logger.LogWarning("No symbols configured for polling. Please check the FINNHUB_SYMBOLS configuration.");
         }
+
+        var requestsPerMinutePerSymbol = (double)MaxRequestsPerMinute / Math.Max(1, _symbols.Count);
+        var secondsPerRequest = Math.Max(1, 60d / requestsPerMinutePerSymbol);
+        _pollingInterval = TimeSpan.FromSeconds(secondsPerRequest);
+        _logger.LogInformation("Polling interval set to {Seconds}s for {Count} symbols.", _pollingInterval.TotalSeconds, _symbols.Count);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
