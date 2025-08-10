@@ -16,7 +16,7 @@ public class FinnhubRestService : BackgroundService
     private const string BaseUrl = "https://finnhub.io/api/v1/quote";
     private const int MaxRequestsPerMinute = 60;
 
-    private readonly TimeSpan _pollingInterval;
+    private readonly TimeSpan _requestInterval;
     private readonly List<string> _symbols;
 
     public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; } = new();
@@ -47,35 +47,32 @@ public class FinnhubRestService : BackgroundService
             _logger.LogWarning("No symbols configured for polling. Please check the FINNHUB_SYMBOLS configuration.");
         }
 
-        var requestsPerMinutePerSymbol = (double)MaxRequestsPerMinute / Math.Max(1, _symbols.Count);
-        var secondsPerRequest = Math.Max(1, 60d / requestsPerMinutePerSymbol);
-        _pollingInterval = TimeSpan.FromSeconds(secondsPerRequest);
-        _logger.LogInformation("Polling interval set to {Seconds}s for {Count} symbols.", _pollingInterval.TotalSeconds, _symbols.Count);
+        _requestInterval = TimeSpan.FromMinutes(1) / MaxRequestsPerMinute;
+        _logger.LogInformation(
+            "Request interval set to {Seconds}s for {Count} symbols (approx {SymbolInterval}s per symbol).",
+            _requestInterval.TotalSeconds,
+            _symbols.Count,
+            _requestInterval.TotalSeconds * Math.Max(1, _symbols.Count));
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Starting concurrent polling for symbols via timers.");
-        var tasks = _symbols.Select(symbol => PollSymbolLoop(symbol, stoppingToken));
-        await Task.WhenAll(tasks);
-    }
-
-    private async Task PollSymbolLoop(string symbol, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Starting polling loop for symbol {Symbol}.", symbol);
-        while (!cancellationToken.IsCancellationRequested)
+        _logger.LogInformation("Starting sequential polling respecting rate limits.");
+        while (!stoppingToken.IsCancellationRequested)
         {
-            await PollFinnhubAsync(symbol);
-            try
+            foreach (var symbol in _symbols)
             {
-                await Task.Delay(_pollingInterval, cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
+                await PollFinnhubAsync(symbol);
+                try
+                {
+                    await Task.Delay(_requestInterval, stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
             }
         }
-        _logger.LogInformation("Polling loop stopped for symbol {Symbol}.", symbol);
     }
 
     private async Task PollFinnhubAsync(string symbol)
@@ -100,7 +97,8 @@ public class FinnhubRestService : BackgroundService
             }
             else if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                _logger.LogError("Rate limit hit when fetching data for symbol {Symbol}.", symbol);
+                _logger.LogWarning("Rate limit hit when fetching data for symbol {Symbol}. Backing off for {Delay}s.", symbol, _requestInterval.TotalSeconds);
+                await Task.Delay(_requestInterval);
             }
             else
             {
