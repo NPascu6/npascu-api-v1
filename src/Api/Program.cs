@@ -5,6 +5,8 @@ using FluentValidation.AspNetCore;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Api.Background;
+using Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +19,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<DeductionRequestValidator>();
+builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddHttpClient<FinnhubRestService>();
+builder.Services.AddHostedService<FinnhubRestService>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins("https://pascu.io")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
+});
 
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
@@ -71,6 +86,9 @@ app.MapGet("/v1/allowances/{canton}/{year:int}", async (string canton, int year,
     var ded = doc.RootElement.GetProperty("deductions");
     return Results.Ok(JsonSerializer.Deserialize<object>(ded.GetRawText())!);
 });
+
+app.MapHub<QuotesHub>("/quotesHub");
+app.MapControllers();
 
 app.Run();
 
