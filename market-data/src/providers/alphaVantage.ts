@@ -1,5 +1,5 @@
 import { MarketDataProvider } from './MarketDataProvider';
-import { Quote, Candle, TickerLite } from '../types';
+import { Quote, Candle, TickerLite, OrderBookSnapshot } from '../types';
 
 const API_BASE = 'https://www.alphavantage.co/query';
 
@@ -76,5 +76,9 @@ export class AlphaVantageProvider implements MarketDataProvider {
       name: m['2. name'],
       exchange: m['4. region']
     }));
+  }
+
+  async getOrderBookSnapshot(_symbol: string, _depth: number = 25): Promise<OrderBookSnapshot> {
+    throw new Error('AlphaVantage provider does not support order book');
   }
 }

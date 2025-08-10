@@ -42,6 +42,17 @@ app.get('/candles/:symbol', async (req, res) => {
   }
 });
 
+app.get('/orderbook/:symbol/snapshot', async (req, res) => {
+  const symbol = req.params.symbol.toUpperCase();
+  const depth = req.query.depth ? parseInt(req.query.depth as string, 10) : 25;
+  try {
+    const snapshot = await router.getOrderBookSnapshot(symbol, depth);
+    res.json(snapshot);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/symbols', async (req, res) => {
   const query = (req.query.query as string) || '';
   try {
