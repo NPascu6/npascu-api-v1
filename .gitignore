@@ -1,2 +1,5 @@
 bin/
 obj/
+# Node.js
+node_modules/
+dist/
