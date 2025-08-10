@@ -21,11 +21,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<DeductionRequestValidator>(
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
