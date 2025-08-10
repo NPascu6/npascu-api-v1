@@ -6,6 +6,8 @@ This repository contains a minimal Swiss finance helpers API built with ASP.NET 
 - `/v1/allowances/{canton}/{year}` – returns deduction allowances
 - `/health` – health check
 
+Swagger UI is available at `/swagger` for exploring and testing the API.
+
 Projects:
 - `src/Api` – HTTP API
 - `src/Domain` – domain entities and services
