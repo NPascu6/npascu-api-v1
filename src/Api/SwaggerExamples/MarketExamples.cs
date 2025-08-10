@@ -1,62 +1,66 @@
 using Domain.DTOs;
 using Swashbuckle.AspNetCore.Filters;
+using System.Collections.Generic;
 
 namespace Api.SwaggerExamples;
 
-public class QuotesExample : IExamplesProvider<Dictionary<string, FinnhubQuoteDto>>
+public class QuotesExample : IExamplesProvider<Dictionary<string, SnapshotDto>>
 {
-    public Dictionary<string, FinnhubQuoteDto> GetExamples() => new()
+    public Dictionary<string, SnapshotDto> GetExamples() => new()
     {
-        ["AAPL"] = new FinnhubQuoteDto
+        ["AAPL"] = new SnapshotDto
         {
-            c = 150.12m,
-            h = 155.00m,
-            l = 149.50m,
-            o = 152.30m,
-            pc = 151.80m,
-            t = 1700000000
+            Symbol = "AAPL",
+            Last = 150.12m,
+            Bid = 150.00m,
+            Ask = 150.20m,
+            Open = 152.30m,
+            High = 155.00m,
+            Low = 149.50m,
+            PrevClose = 151.80m,
+            Ts = 1700000000
         }
     };
 }
 
-public class QuoteExample : IExamplesProvider<FinnhubQuoteDto>
+public class QuoteExample : IExamplesProvider<SnapshotDto>
 {
-    public FinnhubQuoteDto GetExamples() => new()
+    public SnapshotDto GetExamples() => new()
     {
-        c = 150.12m,
-        h = 155.00m,
-        l = 149.50m,
-        o = 152.30m,
-        pc = 151.80m,
-        t = 1700000000
+        Symbol = "AAPL",
+        Last = 150.12m,
+        Bid = 150.00m,
+        Ask = 150.20m,
+        Open = 152.30m,
+        High = 155.00m,
+        Low = 149.50m,
+        PrevClose = 151.80m,
+        Ts = 1700000000
     };
 }
 
-public class OrderBookExample : IExamplesProvider<FinnhubOrderBookDto>
+public class OrderBookExample : IExamplesProvider<OrderBookDto>
 {
-    public FinnhubOrderBookDto GetExamples() => new()
+    public OrderBookDto GetExamples() => new()
     {
-        s = "AAPL",
-        t = 1700000000,
-        b = new[] { new[] { 150.00m, 100m } },
-        a = new[] { new[] { 150.50m, 80m } }
+        Symbol = "AAPL",
+        Ts = 1700000000,
+        Bids = new() { new Level { Price = 150.00m, Size = 100m } },
+        Asks = new() { new Level { Price = 150.50m, Size = 80m } },
+        Depth = 1
     };
 }
 
-public class TradesExample : IExamplesProvider<FinnhubTradeDto>
+public class TradesExample : IExamplesProvider<IEnumerable<TradeDto>>
 {
-    public FinnhubTradeDto GetExamples() => new()
+    public IEnumerable<TradeDto> GetExamples() => new[]
     {
-        s = "AAPL",
-        data = new[]
+        new TradeDto
         {
-            new FinnhubTradeTick
-            {
-                p = 150.10m,
-                v = 50m,
-                t = 1700000000,
-                c = new[] { "@", "T" }
-            }
+            Symbol = "AAPL",
+            Price = 150.10m,
+            Size = 50m,
+            Ts = 1700000000
         }
     };
 }
