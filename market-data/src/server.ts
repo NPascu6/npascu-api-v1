@@ -3,9 +3,12 @@ import { ProviderRouter } from './providers/providerRouter';
 import { FinnhubProvider } from './providers/finnhub';
 import { AlphaVantageProvider } from './providers/alphaVantage';
 import { SyntheticProvider } from './providers/synthetic';
+import { SyntheticTradesProvider } from './providers/tradesProvider';
+import tradesRouter from './routes/trades';
 import { quoteEmitter, insertQuoteSnapshot } from './db';
+import { Quote } from './types';
 
-const app = express();
+export const app = express();
 app.use(express.json());
 
 const router = new ProviderRouter([
@@ -71,7 +74,7 @@ app.get('/stream/quotes', (req, res) => {
     'Cache-Control': 'no-cache',
     Connection: 'keep-alive'
   });
-  const listener = (quote: any) => {
+  const listener = (quote: Quote) => {
     if (symbols.length === 0 || symbols.includes(quote.symbol)) {
       res.write(`data: ${JSON.stringify(quote)}\n\n`);
     }
@@ -82,7 +85,15 @@ app.get('/stream/quotes', (req, res) => {
   });
 });
 
-const port = Number(process.env.PORT) || 8080;
-app.listen(port, () => {
-  console.log(`Server listening on ${port}`);
-});
+app.use('/trades', tradesRouter);
+if (process.env.TRADES_PROVIDER === 'SYNTHETIC') {
+  const provider = new SyntheticTradesProvider(['AAPL', 'MSFT']);
+  provider.start();
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  const port = Number(process.env.PORT) || 8080;
+  app.listen(port, () => {
+    console.log(`Server listening on ${port}`);
+  });
+}
