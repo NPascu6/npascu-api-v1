@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Json;
+using System.Linq;
 using Microsoft.AspNetCore.SignalR;
 using Domain.DTOs;
 using Api.Hubs;
@@ -14,12 +16,14 @@ public class FinnhubRestService : BackgroundService
     private readonly string _apiKey;
     private readonly IHubContext<QuotesHub> _hubContext;
     private const string BaseUrl = "https://finnhub.io/api/v1/quote";
+    private const string TradesUrl = "https://finnhub.io/api/v1/stock/trades";
     private const int MaxRequestsPerMinute = 60;
 
     private readonly TimeSpan _requestInterval;
     private readonly List<string> _symbols;
 
     public static ConcurrentDictionary<string, FinnhubQuoteDto> LatestQuotes { get; } = new();
+    public static ConcurrentDictionary<string, FinnhubTradeTick> LatestTrades { get; } = new();
 
     public FinnhubRestService(IConfiguration configuration, ILogger<FinnhubRestService> logger,
         HttpClient httpClient, IHubContext<QuotesHub> hubContext)
@@ -77,6 +81,12 @@ public class FinnhubRestService : BackgroundService
 
     private async Task PollFinnhubAsync(string symbol)
     {
+        await FetchQuoteAsync(symbol);
+        await FetchLatestTradeAsync(symbol);
+    }
+
+    private async Task FetchQuoteAsync(string symbol)
+    {
         var url = $"{BaseUrl}?symbol={symbol}&token={_apiKey}";
         try
         {
@@ -108,6 +118,42 @@ public class FinnhubRestService : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception while fetching data for symbol {Symbol}.", symbol);
+        }
+    }
+
+    private async Task FetchLatestTradeAsync(string symbol)
+    {
+        var now = DateTime.UtcNow;
+        var from = now.AddMinutes(-5);
+        var url = $"{TradesUrl}?symbol={symbol}&from={from:yyyy-MM-dd}&to={now:yyyy-MM-dd}&token={_apiKey}&limit=1";
+        try
+        {
+            using var response = await _httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                var tradeDto = await response.Content.ReadFromJsonAsync<FinnhubTradeDto>();
+                var trade = tradeDto?.data?.FirstOrDefault();
+                if (trade != null)
+                {
+                    if (LatestTrades.TryGetValue(symbol, out var prev) && prev.t >= trade.t)
+                        return;
+
+                    LatestTrades[symbol] = trade;
+                    await _hubContext.Clients.All.SendAsync("ReceiveTrade", symbol, trade);
+                }
+            }
+            else if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                _logger.LogWarning("Rate limit hit when fetching trades for {Symbol}.", symbol);
+            }
+            else
+            {
+                _logger.LogError("Error fetching trades for symbol {Symbol}. HTTP status: {StatusCode}", symbol, response.StatusCode);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception while fetching trades for symbol {Symbol}.", symbol);
         }
     }
 }
