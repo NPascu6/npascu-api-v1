@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Json;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Domain.DTOs;
 using Api.Hubs;
@@ -66,7 +67,7 @@ public class FinnhubRestService : BackgroundService
         {
             foreach (var symbol in _symbols)
             {
-                await PollFinnhubAsync(symbol);
+                await PollFinnhubAsync(symbol, stoppingToken);
                 try
                 {
                     await Task.Delay(_requestInterval, stoppingToken);
@@ -79,9 +80,18 @@ public class FinnhubRestService : BackgroundService
         }
     }
 
-    private async Task PollFinnhubAsync(string symbol)
+    private async Task PollFinnhubAsync(string symbol, CancellationToken token)
     {
         await FetchQuoteAsync(symbol);
+        try
+        {
+            await Task.Delay(_requestInterval, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
         await FetchLatestTradeAsync(symbol);
     }
 
@@ -131,20 +141,36 @@ public class FinnhubRestService : BackgroundService
             using var response = await _httpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
-                var tradeDto = await response.Content.ReadFromJsonAsync<FinnhubTradeDto>();
-                var trade = tradeDto?.data?.FirstOrDefault();
-                if (trade != null)
+                if (response.Content.Headers.ContentType?.MediaType != "application/json")
                 {
-                    if (LatestTrades.TryGetValue(symbol, out var prev) && prev.t >= trade.t)
-                        return;
+                    var body = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning("Unexpected content type when fetching trades for {Symbol}: {MediaType}. Body: {Body}", symbol, response.Content.Headers.ContentType?.MediaType, body);
+                    return;
+                }
 
-                    LatestTrades[symbol] = trade;
-                    await _hubContext.Clients.All.SendAsync("ReceiveTrade", symbol, trade);
+                try
+                {
+                    var tradeDto = await response.Content.ReadFromJsonAsync<FinnhubTradeDto>();
+                    var trade = tradeDto?.data?.FirstOrDefault();
+                    if (trade != null)
+                    {
+                        if (LatestTrades.TryGetValue(symbol, out var prev) && prev.t >= trade.t)
+                            return;
+
+                        LatestTrades[symbol] = trade;
+                        await _hubContext.Clients.All.SendAsync("ReceiveTrade", symbol, trade);
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    var body = await response.Content.ReadAsStringAsync();
+                    _logger.LogError(ex, "Failed to parse trade data for {Symbol}. Body: {Body}", symbol, body);
                 }
             }
             else if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
                 _logger.LogWarning("Rate limit hit when fetching trades for {Symbol}.", symbol);
+                await Task.Delay(_requestInterval);
             }
             else
             {
