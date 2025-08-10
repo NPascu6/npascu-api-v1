@@ -22,6 +22,15 @@ public class ProfileController : ControllerBase
     public async Task<ActionResult<FinnhubCompanyProfileDto>> Get(string symbol)
     {
         var norm = SymbolNormalizer.Normalize(symbol);
+        if (!SymbolNormalizer.IsValid(norm))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid symbol",
+                Detail = $"Symbol '{symbol}' is invalid.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
         var profile = await _client.GetProfileAsync(norm);
         if (profile == null) return NotFound();
         return Ok(profile);

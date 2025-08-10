@@ -42,10 +42,19 @@ public class TradesController : ControllerBase
     [SwaggerResponseExample(StatusCodes.Status200OK, typeof(TradesExample))]
     public async Task<ActionResult<IEnumerable<TradeDto>>> Get(string symbol, [FromQuery] DateTime from, [FromQuery] DateTime to, [FromQuery] int? limit)
     {
+        var norm = SymbolNormalizer.Normalize(symbol);
+        if (!SymbolNormalizer.IsValid(norm))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid symbol",
+                Detail = $"Symbol '{symbol}' is invalid.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
         if (from == default || to == default)
             return BadRequest("from and to are required");
 
-        var norm = SymbolNormalizer.Normalize(symbol);
         var trades = await _client.GetTradesAsync(norm, from, to, limit);
         if (trades?.data == null) return NotFound();
 

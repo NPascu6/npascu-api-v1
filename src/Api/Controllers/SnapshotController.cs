@@ -38,6 +38,15 @@ public class SnapshotController : ControllerBase
     public async Task<ActionResult<SnapshotDto>> Get(string symbol)
     {
         var norm = SymbolNormalizer.Normalize(symbol);
+        if (!SymbolNormalizer.IsValid(norm))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid symbol",
+                Detail = $"Symbol '{symbol}' is invalid.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
         var snap = await _client.GetQuoteAsync(norm);
         if (snap == null) return NotFound();
 

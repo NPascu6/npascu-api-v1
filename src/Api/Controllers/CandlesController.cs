@@ -21,6 +21,15 @@ public class CandlesController : ControllerBase
     public async Task<ActionResult<FinnhubCandleDto>> Get(string symbol, [FromQuery] string resolution, [FromQuery] DateTime from, [FromQuery] DateTime to)
     {
         var norm = SymbolNormalizer.Normalize(symbol);
+        if (!SymbolNormalizer.IsValid(norm))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid symbol",
+                Detail = $"Symbol '{symbol}' is invalid.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
         var candles = await _client.GetCandlesAsync(norm, resolution, from, to);
         if (candles == null) return NotFound();
         return Ok(candles);

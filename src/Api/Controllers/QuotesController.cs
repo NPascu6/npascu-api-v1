@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Api.Background;
 using Domain.DTOs;
+using Domain.Services;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using Api.SwaggerExamples;
@@ -59,11 +60,21 @@ public class QuotesController : ControllerBase
     [SwaggerResponseExample(StatusCodes.Status200OK, typeof(QuoteExample))]
     public IActionResult GetQuote(string symbol)
     {
-        if (FinnhubRestService.LatestQuotes.TryGetValue(symbol, out var quote))
+        var norm = SymbolNormalizer.Normalize(symbol);
+        if (!SymbolNormalizer.IsValid(norm))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid symbol",
+                Detail = $"Symbol '{symbol}' is invalid.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+        if (FinnhubRestService.LatestQuotes.TryGetValue(norm, out var quote))
         {
             var dto = new SnapshotDto
             {
-                Symbol = symbol,
+                Symbol = norm,
                 Last = quote.c,
                 Bid = 0,
                 Ask = 0,

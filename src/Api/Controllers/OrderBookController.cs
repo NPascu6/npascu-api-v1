@@ -39,6 +39,15 @@ public class OrderBookController : ControllerBase
     public async Task<ActionResult<OrderBookDto>> Get(string symbol, [FromQuery] int? depth)
     {
         var norm = SymbolNormalizer.Normalize(symbol);
+        if (!SymbolNormalizer.IsValid(norm))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid symbol",
+                Detail = $"Symbol '{symbol}' is invalid.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
         var book = await _client.GetOrderBookAsync(norm, depth);
         if (book == null) return NotFound();
 
