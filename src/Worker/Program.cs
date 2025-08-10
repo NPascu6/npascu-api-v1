@@ -5,10 +5,14 @@ using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console()
+    .CreateLogger();
+
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHostedService<PdfWorker>();
-
-builder.Services.AddSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
+builder.Services.AddSerilog();
 
 var app = builder.Build();
 app.Run();
