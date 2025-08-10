@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.SignalR;
-using Api.DTOs;
+using Domain.DTOs;
 using Api.Hubs;
 
 namespace Api.Background;
