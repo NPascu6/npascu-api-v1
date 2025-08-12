@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
 using Domain.DTOs;
 using Api.Hubs;
@@ -144,7 +145,14 @@ public class FinnhubRestService : BackgroundService
                 if (response.Content.Headers.ContentType?.MediaType != "application/json")
                 {
                     var body = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Unexpected content type when fetching trades for {Symbol}: {MediaType}. Body: {Body}", symbol, response.Content.Headers.ContentType?.MediaType, body);
+                    body = Regex.Replace(body, "<script[\\s\\S]*?</script>", string.Empty, RegexOptions.IgnoreCase);
+                    if (body.Length > 200)
+                        body = body[..200] + "...";
+                    _logger.LogWarning(
+                        "Unexpected content type when fetching trades for {Symbol}: {MediaType}. Body: {Body}",
+                        symbol,
+                        response.Content.Headers.ContentType?.MediaType,
+                        body);
                     return;
                 }
 
