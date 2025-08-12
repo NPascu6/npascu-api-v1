@@ -72,6 +72,7 @@ app.UseCors();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
    .WithName("GetHealth")
    .WithTags("Health")
+   .WithGroupName("v1")
    .WithOpenApi(op =>
    {
        op.Summary = "Health check";
@@ -134,6 +135,7 @@ app.MapPost("/v1/deductions/estimate", async (DeductionRequest req, IValidator<D
 })
    .WithName("EstimateDeductions")
     .WithTags("Deductions")
+    .WithGroupName("v1")
     .WithOpenApi(op =>
     {
         op.Summary = "Estimate tax deductions";
@@ -184,6 +186,7 @@ app.MapGet("/v1/allowances/{canton}/{year:int}", async (string canton, int year,
 })
    .WithName("GetAllowances")
    .WithTags("Allowances")
+   .WithGroupName("v1")
    .WithOpenApi(op =>
    {
        op.Summary = "Get deduction allowances";
