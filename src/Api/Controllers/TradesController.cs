@@ -14,7 +14,6 @@ namespace Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[ApiExplorerSettings(GroupName = "Market")]
 public class TradesController : ControllerBase
 {
     private readonly IFinnhubClient _client;

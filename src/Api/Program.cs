@@ -27,17 +27,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "SwissTax API", Version = "v1" });
-    options.SwaggerDoc("Market", new OpenApiInfo { Title = "Market API", Version = "v1" });
-    options.SwaggerDoc("Quotes", new OpenApiInfo { Title = "Quotes API", Version = "v1" });
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     options.EnableAnnotations();
     options.ExampleFilters();
-    options.DocInclusionPredicate((docName, apiDesc) =>
-    {
-        var groupName = apiDesc.GroupName ?? "v1";
-        return groupName == docName;
-    });
 });
 builder.Services.AddSwaggerExamplesFromAssemblyOf<QuoteExample>();
 builder.Services.AddFluentValidationAutoValidation();
@@ -64,8 +57,6 @@ app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "SwissTax API");
-    options.SwaggerEndpoint("/swagger/Market/swagger.json", "Market API");
-    options.SwaggerEndpoint("/swagger/Quotes/swagger.json", "Quotes API");
 });
 app.UseCors();
 
