@@ -23,6 +23,16 @@ dotnet build SwissTax.sln
 dotnet test
 ```
 
+## Export API specification
+
+Generate the OpenAPI description without running the server:
+
+```bash
+./scripts/export-spec.sh openapi.json
+```
+
+The specification will be written to `openapi.json` in the repository root. The script requires the local `Swashbuckle.AspNetCore.Cli` tool, which is restored automatically.
+
 ## Docker
 
 Build and run locally:
