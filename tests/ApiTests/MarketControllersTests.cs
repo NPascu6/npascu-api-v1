@@ -95,4 +95,22 @@ public class MarketControllersTests
         var bad = Assert.IsType<BadRequestObjectResult>(result);
         Assert.IsType<ProblemDetails>(bad.Value);
     }
+
+    [Fact]
+    public async Task Symbols_InvalidExchange_ReturnsBadRequest()
+    {
+        var controller = new SymbolsController(new FakeFinnhubClient());
+        var result = await controller.Get(" ");
+        var bad = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.IsType<ProblemDetails>(bad.Value);
+    }
+
+    [Fact]
+    public async Task Symbols_ReturnsOk()
+    {
+        var controller = new SymbolsController(new FakeFinnhubClient());
+        var result = await controller.Get("US");
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.IsAssignableFrom<IEnumerable<FinnhubSymbolDto>>(ok.Value);
+    }
 }
