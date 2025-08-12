@@ -64,19 +64,22 @@ public class FinnhubRestService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Starting sequential polling respecting rate limits.");
-        while (!stoppingToken.IsCancellationRequested)
+        foreach (var symbol in _symbols)
         {
-            foreach (var symbol in _symbols)
+            if (stoppingToken.IsCancellationRequested)
             {
-                await PollFinnhubAsync(symbol, stoppingToken);
-                try
-                {
-                    await Task.Delay(_requestInterval, stoppingToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
+                break;
+            }
+
+            await PollFinnhubAsync(symbol, stoppingToken);
+
+            try
+            {
+                await Task.Delay(_requestInterval, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
             }
         }
     }
