@@ -8,7 +8,6 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[ApiExplorerSettings(GroupName = "Market")]
 public class ProfileController : ControllerBase
 {
     private readonly IFinnhubClient _client;

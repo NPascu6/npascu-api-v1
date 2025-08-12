@@ -15,7 +15,6 @@ namespace Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[ApiExplorerSettings(GroupName = "Quotes")]
 public class QuotesController : ControllerBase
 {
     /// <summary>
